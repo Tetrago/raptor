@@ -2,78 +2,10 @@
 
 pub mod buffer;
 pub mod item;
+pub mod lexer;
+pub mod macros;
 pub mod prelude;
-pub mod token;
+pub mod span;
 
-macro_rules! group {
-	($(
-		$(#[$attr:meta])*
-		$vis:vis enum $parent:ident {
-			$($name:ident),* $(,)?
-		}
-	)*) => {
-		$(
-			$(#[$attr])*
-			$vis enum $parent<'a> {
-				$($name($name<'a>)),*
-			}
-
-			$(
-				impl<'a> From<$name<'a>> for $parent<'a> {
-					fn from(value: $name<'a>) -> Self {
-						Self::$name(value)
-					}
-				}
-			)*
-		)*
-	};
-}
-
-macro_rules! newtype {
-	($(
-		$(#[$meta:meta])*
-		$vis:vis type $ident:ident $(<$($gen:tt),*>)? = $t:ty $(where $($where:tt)*)?;
-	)+) => {
-		$(
-			$(#[$meta])*
-			$vis struct $ident $(<$($gen),*>)? ($t);
-
-			#[cfg_attr(coverage, coverage(off))]
-			impl $(<$($gen),*>)? ::std::ops::Deref for $ident $(<$($gen),*>)?
-			$(where $($where)*)? {
-				type Target = $t;
-
-				fn deref(&self) -> &Self::Target {
-					&self.0
-				}
-			}
-
-			#[cfg_attr(coverage, coverage(off))]
-			impl $(<$($gen),*>)? ::std::ops::DerefMut for $ident $(<$($gen),*>)?
-			$(where $($where)*)? {
-				fn deref_mut(&mut self) -> &mut Self::Target {
-					&mut self.0
-				}
-			}
-
-			#[cfg_attr(coverage, coverage(off))]
-			impl $(<$($gen),*>)? From<$t> for $ident $(<$($gen),*>)?
-			$(where $($where)*)? {
-				fn from(value: $t) -> Self {
-					Self(value)
-				}
-			}
-
-			#[cfg_attr(coverage, coverage(off))]
-			impl $(<$($gen),*>)? From<$ident $(<$($gen),*>)?> for $t
-			$(where $($where)*)? {
-				fn from(value: $ident $(<$($gen),*>)?) -> Self {
-					value.0
-				}
-			}
-		)+
-	};
-}
-
-pub(crate) use group;
-pub(crate) use newtype;
+pub use span::Span;
+pub use span::Spanned;

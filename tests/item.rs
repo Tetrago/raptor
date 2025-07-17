@@ -2,14 +2,16 @@ use raptor::item::Empty;
 use raptor::item::File;
 use raptor::item::Function;
 use raptor::item::Parameter;
-use raptor::token::Identifier;
-use raptor::token::Lexer;
+use raptor::lexer::Identifier;
+use raptor::lexer::Lexer;
+use raptor::prelude::*;
 
 macro_rules! test {
-	($($t:ident $raw:literal => [$($item:expr),+ $(,)?])+) => {
+	($($t:ident($($src:ident =)? $raw:literal) => [$($item:expr),+ $(,)?])+) => {
 		let mut i = 0;
 
 		$({
+			$(let $src = $raw;)?
 			i += 1;
 
 			let file = <$t>::parse(Lexer::new($raw));
@@ -25,21 +27,21 @@ macro_rules! test {
 #[test]
 fn function() {
 	test! {
-		File "fn main();" => [
+		File(src = "fn main();") => [
 			Function {
-				name: Identifier("main"),
+				name: src.span(3..7).wrap(Identifier("main")),
 				params: Vec::new(),
 				stmt: Empty::default().into(),
 			}
 		]
 
-		File "fn main(a: u32);" => [
+		File(src = "fn main(a: u32);") => [
 			Function {
-				name: Identifier("main"),
+				name: src.span(3..7).wrap(Identifier("main")),
 				params: vec![
 					Parameter {
-						name: Identifier("a"),
-						ty: Identifier("u32")
+						name: src.span(8..8).wrap(Identifier("a")),
+						ty: src.span(11..14).wrap(Identifier("u32")),
 					}
 				],
 				stmt: Empty::default().into(),

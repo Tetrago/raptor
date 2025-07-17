@@ -1,10 +1,11 @@
-macro_rules! token {
+#[macro_export]
+macro_rules! make_lexer {
 	($($name:ident => $pat:literal),+ $(,)?) => {
 		$(
 			#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 			pub struct $name<'a>(pub &'a str);
 
-			impl<'a> $name<'a> {
+			impl $name<'_> {
 				fn regex() -> &'static ::regex::Regex {
 					use ::regex::Regex;
 					use ::std::sync::LazyLock;
@@ -23,7 +24,7 @@ macro_rules! token {
 		}
 
 		impl<'a> Token<'a> {
-			pub fn slice(&self) -> &'a str {
+			pub fn as_str(&self) -> &'a str {
 				match self {
 					$(
 						Self::$name(x) => x.0
@@ -33,7 +34,7 @@ macro_rules! token {
 		}
 
 		impl<'a> Iterator for Lexer<'a> {
-			type Item = (Span<'a>, Token<'a>);
+			type Item = $crate::Spanned<'a, Token<'a>>;
 
 			fn next(&mut self) -> Option<Self::Item> {
 				$(
@@ -42,54 +43,37 @@ macro_rules! token {
 						.map(|m| m.end())
 						.map(|len| self.take(len))
 					{
-						return Some((span, $name(span.slice()).into()));
+						return Some(span.wrap($name(span.as_str()).into()))
 					}
 				)+;
 
 				None
 			}
 		}
+
+		pub struct Lexer<'a> {
+			contents: &'a str,
+			index: usize,
+		}
+
+		impl<'a> Lexer<'a> {
+			pub fn new(contents: &'a str) -> Self {
+				Self { contents, index: 0 }
+			}
+
+			fn take(&mut self, count: usize) -> $crate::Span<'a> {
+				use $crate::prelude::*;
+
+				assert!(self.index + count <= self.contents.len());
+
+				self.index += count;
+				self.contents.span(self.index - count..self.index)
+			}
+		}
 	};
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct Span<'a> {
-	pub src: &'a str,
-	pub from: usize,
-	pub to: usize,
-}
-
-impl<'a> Span<'a> {
-	pub fn slice(&self) -> &'a str {
-		&self.src[self.from..self.to]
-	}
-}
-
-pub struct Lexer<'a> {
-	contents: &'a str,
-	index: usize,
-}
-
-impl<'a> Lexer<'a> {
-	pub fn new(contents: &'a str) -> Self {
-		Self { contents, index: 0 }
-	}
-
-	fn take(&mut self, count: usize) -> Span<'a> {
-		assert!(self.index + count <= self.contents.len());
-
-		let span = Span {
-			src: self.contents,
-			from: self.index,
-			to: self.index + count,
-		};
-
-		self.index += count;
-		span
-	}
-}
-
-token! {
+make_lexer! {
 	Comment => r"^//.*(\n|$)|^/\*.*\*/",
 	Literal => r"^\d*\.\d+|^(0[xbo])?\d+",
 	Identifier => r"^[A-Za-z]\w*|^`[^`]+`",

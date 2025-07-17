@@ -1,24 +1,20 @@
-use raptor::token::*;
+use raptor::lexer::*;
+use raptor::prelude::*;
 
 macro_rules! test {
 	($name:ident, $text:literal => { $($expr:expr),+ $(,)? }) => {
 		#[test]
 		fn $name() {
-			use ::raptor::token::Lexer;
-			use ::raptor::token::Token;
+			use ::raptor::lexer::Lexer;
+			use ::raptor::lexer::Token;
 
 			let contents = $text.trim();
 			let parser = Lexer::new(&contents);
 
 			let tokens = [$($expr.into()),+].iter().scan(0, |state: &mut usize, token: &Token<'_>| {
-				let span = Span {
-					src: &contents,
-					from: *state,
-					to: *state + token.slice().len()
-				};
-
-				*state += token.slice().len();
-				Some((span, *token))
+				let span = contents.span(*state..*state + token.as_str().len());
+				*state += token.as_str().len();
+				Some(span.wrap(*token))
 			}).collect::<Vec<_>>();
 
 			parser.zip(tokens.iter()).for_each(|(parsed, expected)| {

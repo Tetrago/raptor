@@ -1,13 +1,15 @@
 use crate::buffer::Buffered;
 use crate::group;
+use crate::lexer::*;
 use crate::newtype;
 use crate::prelude::*;
-use crate::token::*;
+use crate::Spanned;
 
 macro_rules! item {
-	(@expand $name:ident) => { $name<'a> };
+	(@expand {$name:tt}) => { $crate::Spanned<'a, item!(@expand $name)> };
 	(@expand ($name:tt)) => { Box<item!(@expand $name)> };
 	(@expand [$name:tt]) => { Vec<item!(@expand $name)> };
+	(@expand $name:ident) => { $name<'a> };
 	(@item $name:ident {}) => {
 		#[derive(Default, Clone, Eq, PartialEq)]
 		pub struct $name<'a> {
@@ -40,14 +42,15 @@ macro_rules! parse {
 		Some({ $body })
 	};
 	(@expand $stream:ident ($ident:ident ($name:ident), $($item:tt)*) => $body:block) => {
-		if let Some((_, $crate::token::Token::$ident($name))) = $stream.next() {
+		if let Some(Spanned { span, value: Token::$ident($name) }) = $stream.next() {
+			let $name = span.wrap($name);
 			parse!(@expand $stream ($($item)*) => $body)
 		} else {
 			None
 		}
 	};
 	(@expand $stream:ident ($ident:ident ($value:literal), $($item:tt)*) => $body:block) => {
-		if let Some((_, $crate::token::Token::$ident($ident($value)))) = $stream.next() {
+		if let Some(Spanned { value: Token::$ident($ident($value)), .. }) = $stream.next() {
 			parse!(@expand $stream ($($item)*) => $body)
 		} else {
 			None
@@ -123,7 +126,7 @@ item! {
 
 	BinaryOperation {
 		lhs: (Expression),
-		op: Operator,
+		op: {Operator},
 		rhs: (Expression),
 	}
 
@@ -137,12 +140,12 @@ item! {
 	}
 
 	MonoOperation {
-		op: Operator,
+		op: {Operator},
 		expr: (Expression),
 	}
 
 	Let {
-		ident: Identifier,
+		ident: {Identifier},
 		expr: Expression
 	}
 
@@ -178,22 +181,22 @@ item! {
 	}
 
 	Field {
-		name: Identifier,
-		ty: Identifier
+		name: {Identifier},
+		ty: {Identifier}
 	}
 
 	Struct {
-		name: Identifier,
+		name: {Identifier},
 		fields: [Field]
 	}
 
 	Parameter {
-		name: Identifier,
-		ty: Identifier
+		name: {Identifier},
+		ty: {Identifier}
 	}
 
 	Function {
-		name: Identifier,
+		name: {Identifier},
 		params: [Parameter],
 		stmt: Statement
 	}
@@ -203,22 +206,36 @@ item! {
 	}
 }
 
-impl<'a> Parseable<'a> for Literal<'a> {
+newtype! {
+	#[derive(Debug, PartialEq, Eq, Clone)]
+	pub type IdentifierExpression<'a> = Spanned<'a, Identifier<'a>>;
+
+	#[derive(Debug, PartialEq, Eq, Clone)]
+	pub type LiteralExpression<'a> = Spanned<'a, Literal<'a>>;
+}
+
+impl<'a> Parseable<'a> for LiteralExpression<'a> {
 	fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
 		stream.with(|stream| {
-			stream.next().and_then(|(_, token)| match token {
-				Token::Literal(literal) => Some(literal),
+			stream.next().and_then(|token| match token {
+				Spanned {
+					span,
+					value: Token::Literal(literal),
+				} => Some(span.wrap(literal).into()),
 				_ => None,
 			})
 		})
 	}
 }
 
-impl<'a> Parseable<'a> for Identifier<'a> {
+impl<'a> Parseable<'a> for IdentifierExpression<'a> {
 	fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
 		stream.with(|stream| {
-			stream.next().and_then(|(_, token)| match token {
-				Token::Identifier(ident) => Some(ident),
+			stream.next().and_then(|token| match token {
+				Spanned {
+					span,
+					value: Token::Identifier(ident),
+				} => Some(span.wrap(ident).into()),
 				_ => None,
 			})
 		})
@@ -231,8 +248,8 @@ generic! {
 		BinaryOperation,
 		Invocation,
 		Group,
-		Identifier,
-		Literal,
+		IdentifierExpression,
+		LiteralExpression,
 	}
 
 	Statement {
@@ -253,7 +270,7 @@ generic! {
 	}
 }
 
-type TokenStream<'a> = Buffered<'a, (Span<'a>, Token<'a>)>;
+type TokenStream<'a> = Buffered<'a, Spanned<'a, Token<'a>>>;
 
 trait Parseable<'a>
 where
@@ -285,8 +302,8 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
 
 				while stream
 					.with(|stream| {
-						stream.next().map(|(_, token)| {
-							if matches!(token, Token::Operator(Operator(","))) {
+						stream.next().map(|spanned| {
+							if matches!(spanned.as_ref(), Token::Operator(Operator(","))) {
 								Some(())
 							} else {
 								None
@@ -321,21 +338,21 @@ parse! {
 
 	BinaryOperation(Expression as lhs, Operator(op), Expression as rhs) => {
 		BinaryOperation {
-			lhs: Box::new(lhs),
+			lhs: lhs.into(),
 			op,
-			rhs: Box::new(rhs),
+			rhs: rhs.into(),
 		}
 	},
 
 	Group(Separator("("), Expression as expr, Separator(")")) => {
 		Group {
-			expr: Box::new(expr),
+			expr: expr.into(),
 		}
 	},
 
 	Invocation(Expression as expr, CommaList<Expression> as args) => {
 		Invocation {
-			expr: Box::new(expr),
+			expr: expr.into(),
 			args: args.into(),
 		}
 	},
@@ -343,57 +360,57 @@ parse! {
 	MonoOperation(Operator(op), Expression as expr) => {
 		MonoOperation {
 			op,
-			expr: Box::new(expr),
+			expr: expr.into(),
 		}
 	},
 
 	Let(Identifier(ident), Expression as expr) => {
 		Let {
 			ident,
-			expr
+			expr,
 		}
 	},
 
 	If(Expression as cond, Statement as stmt) => {
 		If {
 			cond,
-			stmt: Box::new(stmt),
+			stmt: stmt.into(),
 		}
 	},
 
 	While(Expression as cond, Statement as stmt) => {
 		While {
 			cond,
-			stmt: Box::new(stmt),
+			stmt: stmt.into(),
 		}
 	},
 
 	Until(Expression as cond, Statement as stmt) => {
 		Until {
 			cond,
-			stmt: Box::new(stmt),
+			stmt: stmt.into(),
 		}
 	},
 
 	Do(Expression as cond, Statement as stmt) => {
 		Do {
 			cond,
-			stmt: Box::new(stmt),
+			stmt: stmt.into(),
 		}
 	},
 
 	Loop(Statement as stmt) => {
 		Loop {
-			stmt: Box::new(stmt),
+			stmt: stmt.into(),
 		}
 	},
 
 	For(Statement as init, Expression as cond, Expression as eval, Statement as stmt) => {
 		For {
-			init: Box::new(init),
+			init: init.into(),
 			cond,
 			eval,
-			stmt: Box::new(stmt),
+			stmt: stmt.into(),
 		}
 	},
 
@@ -424,7 +441,7 @@ parse! {
 impl File<'_> {
 	pub fn parse<'a>(lexer: Lexer<'a>) -> File<'a> {
 		let mut stream = lexer
-			.filter(|(_, token)| !matches!(token, Token::Whitespace(_) | Token::Comment(_)))
+			.filter(|spanned| !matches!(spanned.as_ref(), Token::Whitespace(_) | Token::Comment(_)))
 			.buffered();
 
 		let items = std::iter::from_fn(|| Item::parse(&mut stream)).collect();

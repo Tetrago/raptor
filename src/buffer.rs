@@ -11,6 +11,7 @@ pub struct Buffered<'a, T: Clone> {
 	stacks: Vec<usize>,
 }
 
+#[cfg_attr(coverage, coverage(off))]
 impl<T: Clone + fmt::Debug> fmt::Debug for Buffered<'_, T> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		f.debug_struct("Buffered")
@@ -86,11 +87,6 @@ impl<'a, T: Clone> Iterator for Buffered<'a, T> {
 		} else if self.queue.is_empty() {
 			self.iter.next()
 		} else {
-			debug_assert!(
-				self.stacks.is_empty(),
-				"Expected stacks to be empty beforing removing from the queue"
-			);
-
 			self.queue.pop_front()
 		}
 	}

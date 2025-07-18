@@ -121,3 +121,20 @@ fn with_some() {
 
 	expect!(generator => [5, 6, 7, 8, 9]);
 }
+
+#[test]
+fn midqueue_pop() {
+	let mut generator = Generator(0).buffered();
+
+	generator.with(|generator| {
+		expect!(generator => [0, 1, 2, 3, 4]);
+		None::<()>
+	});
+
+	generator.with(|generator| {
+		expect!(generator => [0, 1, 2]);
+		Some(())
+	});
+
+	expect!(generator => [3, 4, 5]);
+}

@@ -1,3 +1,5 @@
+#![cfg_attr(coverage, coverage(off))]
+
 use std::fmt;
 use std::ops::Deref;
 use std::ops::DerefMut;

@@ -16,6 +16,7 @@ macro_rules! item {
 			_marker: ::std::marker::PhantomData<&'a ()>
 		}
 
+		#[cfg_attr(coverage, coverage(off))]
 		impl ::std::fmt::Debug for $name<'_> {
 			fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
 				write!(f, stringify!($name))
@@ -97,6 +98,7 @@ macro_rules! generic {
 				}
 			}
 
+			#[cfg_attr(coverage, coverage(off))]
 			impl ::std::fmt::Debug for $ident<'_> {
 				fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
 					match self {
@@ -415,7 +417,7 @@ parse! {
 		Field { name, ty }
 	},
 
-	Struct(Identifier(name), Separator("{"), CommaList<Field> as fields, Separator("}")) => {
+	Struct(Identifier("struct"), Identifier(name), Separator("{"), CommaList<Field> as fields, Separator("}")) => {
 		Struct {
 			name,
 			fields: fields.into(),

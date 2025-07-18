@@ -35,13 +35,17 @@ fn function() {
 			}
 		]
 
-		File(src = "fn main(a: u32);") => [
+		File(src = "fn main(a: u32, b: u32);") => [
 			Function {
 				name: src.span(3..7).wrap(Identifier("main")),
 				params: vec![
 					Parameter {
-						name: src.span(8..8).wrap(Identifier("a")),
+						name: src.span(8..9).wrap(Identifier("a")),
 						ty: src.span(11..14).wrap(Identifier("u32")),
+					},
+					Parameter {
+						name: src.span(16..17).wrap(Identifier("b")),
+						ty: src.span(19..22).wrap(Identifier("u32")),
 					}
 				],
 				stmt: Empty::default().into(),

@@ -77,7 +77,7 @@ make_lexer! {
 	Comment => r"^//.*(\n|$)|^/\*.*\*/",
 	Literal => r"^\d*\.\d+|^(0[xbo])?\d+",
 	Identifier => r"^[A-Za-z]\w*|^`[^`]+`",
-	Separator => r"^[\[\]\(\){};,]",
+	Separator => r"^[\[\]\(\){};]",
 	Whitespace => r"^\s+",
 	Operator => r"^[^\w\s\[\]\(\){};]+",
 }

@@ -1,12 +1,23 @@
 use std::collections::VecDeque;
+use std::fmt;
 
 pub struct Buffered<'a, T: Clone> {
 	iter: Box<dyn Iterator<Item = T> + 'a>,
 
 	/// The items that still need to be read by buffered stacks.
 	queue: VecDeque<T>,
+
 	/// The list of next indices for all buffered stacks.
 	stacks: Vec<usize>,
+}
+
+impl<T: Clone + fmt::Debug> fmt::Debug for Buffered<'_, T> {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		f.debug_struct("Buffered")
+			.field("queue", &self.queue)
+			.field("stacks", &self.stacks)
+			.finish_non_exhaustive()
+	}
 }
 
 impl<'a, T: Clone> Buffered<'a, T> {
@@ -20,31 +31,25 @@ impl<'a, T: Clone> Buffered<'a, T> {
 
 	/// Save the current location in the iterator.
 	pub fn push(&mut self) {
-		if let Some(i) = self.stacks.last() {
-			self.stacks.push(*i);
-		} else {
-			self.stacks.push(0);
-		}
+		self.stacks.push(self.stacks.last().cloned().unwrap_or(0));
 	}
 
 	/// Forget the last push location, saving the items for future retrieval.
 	pub fn restore(&mut self) {
+		println!("pop");
 		self.stacks.pop();
 	}
 
-	/// Remove all items since the last push from future retrievals.
+	/// Move the next stack level forward, or clear the queue if no stacks are
+	/// left.
 	pub fn pop(&mut self) {
-		if self.stacks.pop().is_some() {
-			if let Some(i) = self.stacks.last() {
-				debug_assert!(
-					*i <= self.queue.len(),
-					"Expected stack index to be within queue, but index {i} exceedes length {}",
-					self.queue.len()
-				);
-
-				self.queue.resize_with(*i, || unreachable!());
-			} else {
+		if let Some(last) = self.stacks.pop() {
+			if let Some(next) = self.stacks.last_mut() {
+				*next = last;
+			} else if last == self.queue.len() {
 				self.queue.clear();
+			} else {
+				self.queue.drain(..last);
 			}
 		}
 	}
@@ -53,15 +58,10 @@ impl<'a, T: Clone> Buffered<'a, T> {
 	/// None.
 	pub fn with<R>(&mut self, f: impl FnOnce(&mut Self) -> Option<R>) -> Option<R> {
 		self.push();
-		let result = f(self);
-
-		if result.is_some() {
-			self.pop();
-			result
-		} else {
+		f(self).inspect(|_| self.pop()).or_else(|| {
 			self.restore();
 			None
-		}
+		})
 	}
 }
 

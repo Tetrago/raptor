@@ -302,18 +302,15 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
 
 				while stream
 					.with(|stream| {
-						stream.next().map(|spanned| {
-							if matches!(spanned.as_ref(), Token::Operator(Operator(","))) {
-								Some(())
-							} else {
-								None
-							}
+						stream.next().and_then(|Spanned { value, .. }| match value {
+							Token::Operator(Operator(",")) => Some(()),
+							_ => None,
 						})
 					})
 					.is_some()
 				{
 					if let Some(item) = stream.with(T::parse) {
-						items.push(item)
+						items.push(item);
 					} else {
 						break;
 					}

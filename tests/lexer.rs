@@ -38,6 +38,28 @@ test!(empty_main_fn, r"fn main() {}" => {
 	Separator("}"),
 });
 
+test!(param_main_fn, r"fn main(a: u32, b: u32,) {}" => {
+	Identifier("fn"),
+	Whitespace(" "),
+	Identifier("main"),
+	Separator("("),
+	Identifier("a"),
+	Operator(":"),
+	Whitespace(" "),
+	Identifier("u32"),
+	Operator(","),
+	Whitespace(" "),
+	Identifier("b"),
+	Operator(":"),
+	Whitespace(" "),
+	Identifier("u32"),
+	Operator(","),
+	Separator(")"),
+	Whitespace(" "),
+	Separator("{"),
+	Separator("}"),
+});
+
 test!(field_inequality, r"obj.field != value" => {
 	Identifier("obj"),
 	Operator("."),

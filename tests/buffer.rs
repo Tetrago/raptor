@@ -104,7 +104,7 @@ fn with_none() {
 
 	generator.with(|generator| {
 		expect!(generator => [0, 1, 2, 3, 4]);
-		Option::<()>::None
+		None::<()>
 	});
 
 	expect!(generator => [0, 1, 2, 3, 4]);

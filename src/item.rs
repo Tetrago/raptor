@@ -39,37 +39,42 @@ macro_rules! item {
 }
 
 macro_rules! parse {
-	(@expand $stream:ident () => $body:block) => {
+	(@expand $obj:ident { $($field:ident),* } $stream:ident ($(,)?) => $body:block) => {
 		Some({ $body })
 	};
-	(@expand $stream:ident ($ident:ident ($name:ident), $($item:tt)*) => $body:block) => {
-		if let Some(Spanned { span, value: Token::$ident($name) }) = $stream.next() {
+	(@expand $obj:ident { $($field:ident),+ } $stream:ident ($(,)?)) => {
+		Some($obj {
+			$($field: $field.into()),+
+		})
+	};
+	(@expand $obj:ident { $($field:ident),* } $stream:ident ($ident:ident ($name:ident), $($item:tt)*) $(=> $body:block)?) => {
+		if let Some($crate::Spanned { span, value: Token::$ident($name) }) = $stream.next() {
 			let $name = span.wrap($name);
-			parse!(@expand $stream ($($item)*) => $body)
+			parse!(@expand $obj { $($field,)* $name } $stream ($($item)*) $(=> $body)?)
 		} else {
 			None
 		}
 	};
-	(@expand $stream:ident ($ident:ident ($value:literal), $($item:tt)*) => $body:block) => {
-		if let Some(Spanned { value: Token::$ident($ident($value)), .. }) = $stream.next() {
-			parse!(@expand $stream ($($item)*) => $body)
+	(@expand $obj:ident { $($field:ident),* } $stream:ident ($ident:ident ($value:literal), $($item:tt)*) $(=> $body:block)?) => {
+		if let Some($crate::Spanned { value: Token::$ident($ident($value)), .. }) = $stream.next() {
+			parse!(@expand $obj { $($field),* } $stream ($($item)*) $(=> $body)?)
 		} else {
 			None
 		}
 	};
-	(@expand $stream:ident ($t:ty as $name:ident, $($item:tt)*) => $body:block) => {
+	(@expand $obj:ident { $($field:ident),* } $stream:ident ($t:ty as $name:ident, $($item:tt)*) $(=> $body:block)?) => {
 		if let Some($name) = <$t>::parse($stream) {
-			parse!(@expand $stream ($($item)*) => $body)
+			parse!(@expand $obj { $($field,)* $name } $stream ($($item)*) $(=> $body)?)
 		} else {
 			None
 		}
 	};
-	($($ident:ident ($($item:tt)+) => $body:block),+ $(,)?) => {
+	($($ident:ident { $($item:tt)+ } $(=> $body:block)? ;)+) => {
 		$(
 			impl<'a> Parseable<'a> for $ident<'a> {
 				fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
 					stream.with(|stream| {
-						parse!(@expand stream ($($item)+,) => $body)
+						parse!(@expand $ident {} stream ($($item)+,) $(=> $body)?)
 					})
 				}
 			}
@@ -146,65 +151,69 @@ item! {
 		expr: (Expression),
 	}
 
+	Action {
+		expr: Expression,
+	}
+
 	Let {
 		ident: {Identifier},
-		expr: Expression
+		expr: Expression,
 	}
 
 	If {
 		cond: Expression,
-		stmt: (Statement)
+		stmt: (Statement),
 	}
 
 	While {
 		cond: Expression,
-		stmt: (Statement)
+		stmt: (Statement),
 	}
 
 	Until {
 		cond: Expression,
-		stmt: (Statement)
+		stmt: (Statement),
 	}
 
 	Do {
 		cond: Expression,
-		stmt: (Statement)
+		stmt: (Statement),
 	}
 
 	Loop {
-		stmt: (Statement)
+		stmt: (Statement),
 	}
 
 	For {
 		init: (Statement),
 		cond: Expression,
 		eval: Expression,
-		stmt: (Statement)
+		stmt: (Statement),
 	}
 
 	Field {
 		name: {Identifier},
-		ty: {Identifier}
+		ty: {Identifier},
 	}
 
 	Struct {
 		name: {Identifier},
-		fields: [Field]
+		fields: [Field],
 	}
 
 	Parameter {
 		name: {Identifier},
-		ty: {Identifier}
+		ty: {Identifier},
 	}
 
 	Function {
 		name: {Identifier},
 		params: [Parameter],
-		stmt: Statement
+		stmt: Statement,
 	}
 
 	File {
-		items: [Item]
+		items: [Item],
 	}
 }
 
@@ -264,6 +273,7 @@ generic! {
 		Loop,
 		While,
 		Until,
+		Action,
 	}
 
 	Item {
@@ -325,116 +335,128 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
 }
 
 parse! {
-	Empty(Separator(";")) => {
+	Empty { Separator(";") } => {
 		Empty::default()
-	},
+	};
 
-	Block(List<Statement> as stmts) => {
-		Block {
-			stmts: stmts.into(),
-		}
-	},
+	Block {
+		List<Statement> as stmts,
+	};
 
-	BinaryOperation(Expression as lhs, Operator(op), Expression as rhs) => {
-		BinaryOperation {
-			lhs: lhs.into(),
-			op,
-			rhs: rhs.into(),
-		}
-	},
+	BinaryOperation {
+		Expression as lhs,
+		Operator(op),
+		Expression as rhs,
+	};
 
-	Group(Separator("("), Expression as expr, Separator(")")) => {
-		Group {
-			expr: expr.into(),
-		}
-	},
+	Group {
+		Separator("("),
+		Expression as expr,
+		Separator(")"),
+	};
 
-	Invocation(Expression as expr, CommaList<Expression> as args) => {
-		Invocation {
-			expr: expr.into(),
-			args: args.into(),
-		}
-	},
+	Invocation {
+		Expression as expr,
+		Separator("("),
+		CommaList<Expression> as args,
+		Separator(")"),
+	};
 
-	MonoOperation(Operator(op), Expression as expr) => {
-		MonoOperation {
-			op,
-			expr: expr.into(),
-		}
-	},
+	MonoOperation {
+		Operator(op),
+		Expression as expr,
+	};
 
-	Let(Identifier(ident), Expression as expr) => {
-		Let {
-			ident,
-			expr,
-		}
-	},
+	Action {
+		Expression as expr,
+		Separator(";"),
+	};
 
-	If(Expression as cond, Statement as stmt) => {
-		If {
-			cond,
-			stmt: stmt.into(),
-		}
-	},
+	Let {
+		Identifier("let"),
+		Identifier(ident),
+		Operator("="),
+		Expression as expr,
+		Separator(";"),
+	};
 
-	While(Expression as cond, Statement as stmt) => {
-		While {
-			cond,
-			stmt: stmt.into(),
-		}
-	},
+	If {
+		Identifier("if"),
+		Separator("("),
+		Expression as cond,
+		Separator(")"),
+		Statement as stmt,
+	};
 
-	Until(Expression as cond, Statement as stmt) => {
-		Until {
-			cond,
-			stmt: stmt.into(),
-		}
-	},
+	While {
+		Identifier("while"),
+		Separator("("),
+		Expression as cond,
+		Separator(")"),
+		Statement as stmt,
+	};
 
-	Do(Expression as cond, Statement as stmt) => {
-		Do {
-			cond,
-			stmt: stmt.into(),
-		}
-	},
+	Until {
+		Identifier("until"),
+		Separator("("),
+		Expression as cond,
+		Separator(")"),
+		Statement as stmt,
+	};
 
-	Loop(Statement as stmt) => {
-		Loop {
-			stmt: stmt.into(),
-		}
-	},
+	Do {
+		Identifier("do"),
+		Statement as stmt,
+		Identifier("while"),
+		Separator("("),
+		Expression as cond,
+		Separator(")"),
+	};
 
-	For(Statement as init, Expression as cond, Expression as eval, Statement as stmt) => {
-		For {
-			init: init.into(),
-			cond,
-			eval,
-			stmt: stmt.into(),
-		}
-	},
+	Loop {
+		Identifier("loop"),
+		Statement as stmt,
+	};
 
-	Field(Identifier(name), Operator(":"), Identifier(ty)) => {
-		Field { name, ty }
-	},
+	For {
+		Identifier("for"),
+		Separator("("),
+		Statement as init,
+		Expression as cond,
+		Separator(";"),
+		Expression as eval,
+		Separator(")"),
+		Statement as stmt,
+	};
 
-	Struct(Identifier("struct"), Identifier(name), Separator("{"), CommaList<Field> as fields, Separator("}")) => {
-		Struct {
-			name,
-			fields: fields.into(),
-		}
-	},
+	Field {
+		Identifier(name),
+		Operator(":"),
+		Identifier(ty),
+	};
 
-	Parameter(Identifier(name), Operator(":"), Identifier(ty)) => {
-		Parameter { name, ty }
-	},
+	Struct {
+		Identifier("struct"),
+		Identifier(name),
+		Separator("{"),
+		CommaList<Field> as fields,
+		Separator("}"),
+	};
 
-	Function(Identifier("fn"), Identifier(name), Separator("("), CommaList<Parameter> as params, Separator(")"), Statement as stmt) => {
-		Function {
-			name,
-			params: params.into(),
-			stmt,
-		}
-	}
+	Parameter {
+		Identifier(name),
+		Operator(":"),
+		Identifier(ty),
+	};
+
+	Function {
+		Identifier("fn"),
+		Identifier(name),
+		Separator("("),
+		CommaList<Parameter> as params,
+		Separator(")"),
+		Statement as stmt,
+	};
 }
 
 impl File<'_> {

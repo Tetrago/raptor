@@ -20,6 +20,10 @@ lint:
 build:
     @cargo build
 
+[group('examples')]
+parse file:
+    @cargo run --example parse {{file}}
+
 [group('coverage')]
 coverage:
     @cargo llvm-cov nextest {{llvm-cov-args}}

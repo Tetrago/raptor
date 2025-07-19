@@ -2,7 +2,7 @@
 macro_rules! make_lexer {
 	($($name:ident => $pat:literal),+ $(,)?) => {
 		$(
-			#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+			#[derive(PartialEq, Eq, Clone, Copy)]
 			pub struct $name<'a>(pub &'a str);
 
 			impl $name<'_> {
@@ -12,6 +12,12 @@ macro_rules! make_lexer {
 
 					static INSTANCE: LazyLock<Regex> = LazyLock::new(|| Regex::new($pat).unwrap());
 					&*INSTANCE
+				}
+			}
+
+			impl ::std::fmt::Debug for $name<'_> {
+				fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+					write!(f, concat!(stringify!($name), "(\"{}\")"), self.0)
 				}
 			}
 		)+

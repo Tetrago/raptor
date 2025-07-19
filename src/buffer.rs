@@ -37,7 +37,6 @@ impl<'a, T: Clone> Buffered<'a, T> {
 
 	/// Forget the last push location, saving the items for future retrieval.
 	pub fn restore(&mut self) {
-		println!("pop");
 		self.stacks.pop();
 	}
 

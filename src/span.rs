@@ -60,10 +60,14 @@ impl<T: Clone> Clone for Spanned<'_, T> {
 
 impl<T: fmt::Debug> fmt::Debug for Spanned<'_, T> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		f.debug_tuple("Spanned")
-			.field(&(self.span.from..self.span.to))
-			.field(&self.value)
-			.finish()
+		if f.alternate() {
+			self.value.fmt(f)
+		} else {
+			f.debug_tuple("Spanned")
+				.field(&(self.span.from..self.span.to))
+				.field(&self.value)
+				.finish()
+		}
 	}
 }
 

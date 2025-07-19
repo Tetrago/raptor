@@ -107,7 +107,7 @@ macro_rules! generic {
 			impl ::std::fmt::Debug for $ident<'_> {
 				fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
 					match self {
-						$($ident::$name(x) => write!(f, "{:?}", x)),+
+						$($ident::$name(x) => x.fmt(f)),+
 					}
 				}
 			}

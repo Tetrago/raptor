@@ -24,6 +24,10 @@ build:
 parse file:
     @cargo run --example parse {{file}}
 
+[group('examples')]
+lex file:
+    @cargo run --example lex {{file}}
+
 [group('coverage')]
 coverage:
     @cargo llvm-cov nextest {{llvm-cov-args}}

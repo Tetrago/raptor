@@ -12,6 +12,15 @@ macro_rules! group {
 				$($name($name<'a>)),*
 			}
 
+			#[cfg_attr(coverage, coverage(off))]
+			impl ::std::fmt::Debug for $parent<'_> {
+				fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+					match self {
+						$($parent::$name(x) => x.fmt(f)),+
+					}
+				}
+			}
+
 			$(
 				impl<'a> From<$name<'a>> for $parent<'a> {
 					fn from(value: $name<'a>) -> Self {

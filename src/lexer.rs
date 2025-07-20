@@ -23,7 +23,7 @@ macro_rules! make_lexer {
 		)+
 
 		$crate::group! {
-			#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+			#[derive(PartialEq, Eq, Clone, Copy)]
 			pub enum Token {
 				$($name),+
 			}
@@ -81,7 +81,7 @@ macro_rules! make_lexer {
 
 make_lexer! {
 	Comment => r"^//.*(\n|$)|^/\*.*\*/",
-	Literal => r"^\d*\.\d+|^(0[xbo])?\d+",
+	Literal => r"^\d*\.\d+|^(0[xbo])?\d+|^true|^false",
 	Identifier => r"^[A-Za-z]\w*|^`[^`]+`",
 	Separator => r"^[\[\]\(\){};]",
 	Whitespace => r"^\s+",

@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::buffer::Buffered;
 use crate::group;
 use crate::lexer::*;
@@ -102,15 +104,6 @@ macro_rules! generic {
 					generic!(@or $ident stream $($name,)+)
 				}
 			}
-
-			#[cfg_attr(coverage, coverage(off))]
-			impl ::std::fmt::Debug for $ident<'_> {
-				fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
-					match self {
-						$($ident::$name(x) => x.fmt(f)),+
-					}
-				}
-			}
 		)+
 
 		group! {
@@ -131,8 +124,20 @@ item! {
 		stmts: [Statement]
 	}
 
+	Break {}
+
+	MultiplicationOperation {
+		lhs: PrimaryExpression,
+		rhs: (Expression),
+	}
+
+	AdditionOperation {
+		lhs: PrimaryExpression,
+		rhs: (Expression),
+	}
+
 	BinaryOperation {
-		lhs: (Expression),
+		lhs: PrimaryExpression,
 		op: {Operator},
 		rhs: (Expression),
 	}
@@ -142,7 +147,7 @@ item! {
 	}
 
 	Invocation {
-		expr: (Expression),
+		expr: PrimaryExpression,
 		args: [Expression],
 	}
 
@@ -151,7 +156,7 @@ item! {
 		expr: (Expression),
 	}
 
-	Action {
+	Evaluate {
 		expr: Expression,
 	}
 
@@ -182,6 +187,10 @@ item! {
 
 	Loop {
 		stmt: (Statement),
+	}
+
+	Return {
+		expr: Expression,
 	}
 
 	For {
@@ -218,62 +227,58 @@ item! {
 }
 
 newtype! {
-	#[derive(Debug, PartialEq, Eq, Clone)]
+	#[derive(PartialEq, Eq, Clone)]
 	pub type IdentifierExpression<'a> = Spanned<'a, Identifier<'a>>;
 
-	#[derive(Debug, PartialEq, Eq, Clone)]
+	#[derive(PartialEq, Eq, Clone)]
 	pub type LiteralExpression<'a> = Spanned<'a, Literal<'a>>;
 }
 
-impl<'a> Parseable<'a> for LiteralExpression<'a> {
-	fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
-		stream.with(|stream| {
-			stream.next().and_then(|token| match token {
-				Spanned {
-					span,
-					value: Token::Literal(literal),
-				} => Some(span.wrap(literal).into()),
-				_ => None,
-			})
-		})
+impl fmt::Debug for IdentifierExpression<'_> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
+		self.value.fmt(f)
 	}
 }
 
-impl<'a> Parseable<'a> for IdentifierExpression<'a> {
-	fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
-		stream.with(|stream| {
-			stream.next().and_then(|token| match token {
-				Spanned {
-					span,
-					value: Token::Identifier(ident),
-				} => Some(span.wrap(ident).into()),
-				_ => None,
-			})
-		})
+impl fmt::Debug for LiteralExpression<'_> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
+		self.value.fmt(f)
 	}
 }
 
 generic! {
-	Expression {
+	PrimaryExpression {
 		MonoOperation,
-		BinaryOperation,
-		Invocation,
 		Group,
 		IdentifierExpression,
 		LiteralExpression,
 	}
 
+	BinaryExpression {
+		MultiplicationOperation,
+		AdditionOperation,
+		BinaryOperation,
+	}
+
+	Expression {
+		BinaryExpression,
+		Invocation,
+		PrimaryExpression,
+	}
+
 	Statement {
-		Empty,
 		Block,
+		Break,
 		Do,
+		Empty,
+		Evaluate,
 		For,
 		If,
 		Let,
 		Loop,
-		While,
+		Return,
 		Until,
-		Action,
+		While,
 	}
 
 	Item {
@@ -335,16 +340,40 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
 }
 
 parse! {
+	IdentifierExpression { Identifier(ident) } => { ident.into() };
+	LiteralExpression { Literal(literal) } => { literal.into() };
+
 	Empty { Separator(";") } => {
 		Empty::default()
 	};
 
 	Block {
+		Separator("{"),
 		List<Statement> as stmts,
+		Separator("}"),
+	};
+
+	Break {
+		Identifier("break"),
+		Separator(";"),
+	} => {
+		Break::default()
+	};
+
+	MultiplicationOperation {
+		PrimaryExpression as lhs,
+		Operator("*"),
+		Expression as rhs,
+	};
+
+	AdditionOperation {
+		PrimaryExpression as lhs,
+		Operator("+"),
+		Expression as rhs,
 	};
 
 	BinaryOperation {
-		Expression as lhs,
+		PrimaryExpression as lhs,
 		Operator(op),
 		Expression as rhs,
 	};
@@ -356,7 +385,7 @@ parse! {
 	};
 
 	Invocation {
-		Expression as expr,
+		PrimaryExpression as expr,
 		Separator("("),
 		CommaList<Expression> as args,
 		Separator(")"),
@@ -367,7 +396,7 @@ parse! {
 		Expression as expr,
 	};
 
-	Action {
+	Evaluate {
 		Expression as expr,
 		Separator(";"),
 	};
@@ -411,6 +440,12 @@ parse! {
 		Separator("("),
 		Expression as cond,
 		Separator(")"),
+	};
+
+	Return {
+		Identifier("return"),
+		Expression as expr,
+		Separator(";"),
 	};
 
 	Loop {

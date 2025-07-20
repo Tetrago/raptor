@@ -45,9 +45,6 @@
              , { ANY - digit - alpha - "_" - whitespace - separator };
 
 (* Items *)
-    (* Block *)
-    block = "{", { statement }, "}";
-
     (* Expression *)
     invocation = expression, "(", [ expression, { ",", expression } ], ")";
     mono_operation = operator, expression;
@@ -57,14 +54,17 @@
     expression = identifier | literal | binary_operation | group;
 
     (* Statement *)
-    empty = ";";
-    let   = "let", identifier, "=", expression, ";";
-    if    = "if", "(", expression, ")", statement;
-    while = "while", "(", expression, ")", statement;
-    until = "until", "(", expression, ")", statement;
-    loop  = "loop", statement;
-    for   = "for", "(", statement, expression, ";", statement, ")", statement;
-    do    = "do", statement, "while", "(", expression, ")", ";";
+    empty  = ";";
+    block  = "{", { statement }, "}";
+    let    = "let", identifier, "=", expression, ";";
+    if     = "if", "(", expression, ")", statement;
+    while  = "while", "(", expression, ")", statement;
+    until  = "until", "(", expression, ")", statement;
+    loop   = "loop", statement;
+    return = "return", expression, ";";
+    break  = "break", ";";
+    for    = "for", "(", statement, expression, ";", statement, ")", statement;
+    do     = "do", statement, "while", "(", expression, ")", ";";
 
     statement = empty | let | if | while | for | do | until | block;
 

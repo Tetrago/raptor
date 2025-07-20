@@ -1,7 +1,8 @@
 use std::fmt;
 
-use crate::buffer::Buffered;
 use crate::group;
+use crate::lexer::Parseable;
+use crate::lexer::TokenStream;
 use crate::lexer::*;
 use crate::newtype;
 use crate::prelude::*;
@@ -49,14 +50,6 @@ macro_rules! parse {
 			$($field: $field.into()),+
 		})
 	};
-	(@expand $obj:ident { $($field:ident),* } $stream:ident ($ident:ident ($name:ident), $($item:tt)*) $(=> $body:block)?) => {
-		if let Some($crate::Spanned { span, value: Token::$ident($name) }) = $stream.next() {
-			let $name = span.wrap($name);
-			parse!(@expand $obj { $($field,)* $name } $stream ($($item)*) $(=> $body)?)
-		} else {
-			None
-		}
-	};
 	(@expand $obj:ident { $($field:ident),* } $stream:ident ($ident:ident ($value:literal), $($item:tt)*) $(=> $body:block)?) => {
 		if let Some($crate::Spanned { value: Token::$ident($ident($value)), .. }) = $stream.next() {
 			parse!(@expand $obj { $($field),* } $stream ($($item)*) $(=> $body)?)
@@ -74,7 +67,9 @@ macro_rules! parse {
 	($($ident:ident { $($item:tt)+ } $(=> $body:block)? ;)+) => {
 		$(
 			impl<'a> Parseable<'a> for $ident<'a> {
-				fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
+				type Target = Self;
+
+				fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
 					stream.with(|stream| {
 						parse!(@expand $ident {} stream ($($item)+,) $(=> $body)?)
 					})
@@ -100,7 +95,9 @@ macro_rules! generic {
 	)+) => {
 		$(
 			impl<'a> Parseable<'a> for $ident<'a> {
-				fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
+				type Target = Self;
+
+				fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
 					generic!(@or $ident stream $($name,)+)
 				}
 			}
@@ -287,32 +284,21 @@ generic! {
 	}
 }
 
-type TokenStream<'a> = Buffered<'a, Spanned<'a, Token<'a>>>;
-
-trait Parseable<'a>
-where
-	Self: Sized + 'a,
-{
-	fn parse(stream: &mut TokenStream<'a>) -> Option<Self>;
-}
-
-newtype! {
-	type List<T> = Vec<T>;
-	type CommaList<T> = Vec<T>;
-}
+pub struct List<T>(std::marker::PhantomData<T>);
+pub struct CommaList<T>(std::marker::PhantomData<T>);
 
 impl<'a, T: Parseable<'a>> Parseable<'a> for List<T> {
-	fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
-		Some(
-			std::iter::from_fn(|| stream.with(T::parse))
-				.collect::<Vec<_>>()
-				.into(),
-		)
+	type Target = Vec<T::Target>;
+
+	fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
+		Some(std::iter::from_fn(|| stream.with(T::parse)).collect())
 	}
 }
 
 impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
-	fn parse(stream: &mut TokenStream<'a>) -> Option<Self> {
+	type Target = Vec<T::Target>;
+
+	fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
 		stream
 			.with(|stream| {
 				let mut items = vec![T::parse(stream)?];
@@ -333,15 +319,15 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
 					}
 				}
 
-				Some(items.into())
+				Some(items)
 			})
-			.or(Some(Vec::new().into()))
+			.or(Some(Vec::new()))
 	}
 }
 
 parse! {
-	IdentifierExpression { Identifier(ident) } => { ident.into() };
-	LiteralExpression { Literal(literal) } => { literal.into() };
+	IdentifierExpression { Identifier as ident } => { ident.into() };
+	LiteralExpression { Literal as literal } => { literal.into() };
 
 	Empty { Separator(";") } => {
 		Empty::default()
@@ -374,7 +360,7 @@ parse! {
 
 	BinaryOperation {
 		PrimaryExpression as lhs,
-		Operator(op),
+		Operator as op,
 		Expression as rhs,
 	};
 
@@ -392,7 +378,7 @@ parse! {
 	};
 
 	MonoOperation {
-		Operator(op),
+		Operator as op,
 		Expression as expr,
 	};
 
@@ -403,7 +389,7 @@ parse! {
 
 	Let {
 		Identifier("let"),
-		Identifier(ident),
+		Identifier as ident,
 		Operator("="),
 		Expression as expr,
 		Separator(";"),
@@ -440,6 +426,7 @@ parse! {
 		Separator("("),
 		Expression as cond,
 		Separator(")"),
+		Separator(";"),
 	};
 
 	Return {
@@ -465,28 +452,28 @@ parse! {
 	};
 
 	Field {
-		Identifier(name),
+		Identifier as name,
 		Operator(":"),
-		Identifier(ty),
+		Identifier as ty,
 	};
 
 	Struct {
 		Identifier("struct"),
-		Identifier(name),
+		Identifier as name,
 		Separator("{"),
 		CommaList<Field> as fields,
 		Separator("}"),
 	};
 
 	Parameter {
-		Identifier(name),
+		Identifier as name,
 		Operator(":"),
-		Identifier(ty),
+		Identifier as ty,
 	};
 
 	Function {
 		Identifier("fn"),
-		Identifier(name),
+		Identifier as name,
 		Separator("("),
 		CommaList<Parameter> as params,
 		Separator(")"),

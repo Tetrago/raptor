@@ -42,22 +42,31 @@ macro_rules! item {
 }
 
 macro_rules! parse {
-	(@expand $obj:ident { $($field:ident),* } $stream:ident ($(,)?) => $body:block) => {
+	(@expand $obj:ident { $($field:ident),* $(,)? } $stream:ident ($(,)?) => $body:block) => {
 		Some({ $body })
 	};
-	(@expand $obj:ident { $($field:ident),+ } $stream:ident ($(,)?)) => {
+	(@expand $obj:ident { $($field:ident),+ $(,)? } $stream:ident ($(,)?)) => {
 		Some($obj {
 			$($field: $field.into()),+
 		})
 	};
-	(@expand $obj:ident { $($field:ident),* } $stream:ident ($ident:ident ($value:literal), $($item:tt)*) $(=> $body:block)?) => {
-		if let Some($crate::Spanned { value: Token::$ident($ident($value)), .. }) = $stream.next() {
-			parse!(@expand $obj { $($field),* } $stream ($($item)*) $(=> $body)?)
-		} else {
-			None
+	(@expand $obj:ident { $($field:ident),* $(,)? } $stream:ident ($ident:ident ($($value:literal)|+) $(as $name:ident)?, $($item:tt)*) $(=> $body:block)?) => {
+		match $stream.next() {
+			#[allow(unused_parens)]
+			$($name @)? ($(Some($crate::Spanned { value: Token::$ident($ident($value)), .. }))|+) => {
+				$(
+					let $name = match $name {
+						Some($crate::Spanned { span, value: Token::$ident(value) }) => span.wrap(value),
+						_ => unreachable!(),
+					};
+				)?
+
+				parse!(@expand $obj { $($field,)* $($name)? } $stream ($($item)*) $(=> $body)?)
+			}
+			_ => None
 		}
 	};
-	(@expand $obj:ident { $($field:ident),* } $stream:ident ($t:ty as $name:ident, $($item:tt)*) $(=> $body:block)?) => {
+	(@expand $obj:ident { $($field:ident),* $(,)? } $stream:ident ($t:ty as $name:ident, $($item:tt)*) $(=> $body:block)?) => {
 		if let Some($name) = <$t>::parse($stream) {
 			parse!(@expand $obj { $($field,)* $name } $stream ($($item)*) $(=> $body)?)
 		} else {
@@ -123,13 +132,15 @@ item! {
 
 	Break {}
 
-	MultiplicationOperation {
+	GeometricOperation {
 		lhs: PrimaryExpression,
+		op: {Operator},
 		rhs: (Expression),
 	}
 
-	AdditionOperation {
+	ArithmeticOperation {
 		lhs: PrimaryExpression,
+		op: {Operator},
 		rhs: (Expression),
 	}
 
@@ -252,8 +263,8 @@ generic! {
 	}
 
 	BinaryExpression {
-		MultiplicationOperation,
-		AdditionOperation,
+		GeometricOperation,
+		ArithmeticOperation,
 		BinaryOperation,
 	}
 
@@ -346,15 +357,15 @@ parse! {
 		Break::default()
 	};
 
-	MultiplicationOperation {
+	GeometricOperation {
 		PrimaryExpression as lhs,
-		Operator("*"),
+		Operator("*" | "/") as op,
 		Expression as rhs,
 	};
 
-	AdditionOperation {
+	ArithmeticOperation {
 		PrimaryExpression as lhs,
-		Operator("+"),
+		Operator("+" | "-") as op,
 		Expression as rhs,
 	};
 

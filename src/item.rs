@@ -133,20 +133,25 @@ item! {
 	Break {}
 
 	GeometricOperation {
-		lhs: PrimaryExpression,
+		lhs: SecondaryExpression,
 		op: {Operator},
-		rhs: (Expression),
+		rhs: (TertiaryExpression),
 	}
 
 	ArithmeticOperation {
-		lhs: PrimaryExpression,
+		lhs: SecondaryExpression,
 		op: {Operator},
-		rhs: (Expression),
+		rhs: (TertiaryExpression),
 	}
 
 	BinaryOperation {
-		lhs: PrimaryExpression,
+		lhs: SecondaryExpression,
 		op: {Operator},
+		rhs: (TertiaryExpression),
+	}
+
+	Join {
+		lhs: TertiaryExpression,
 		rhs: (Expression),
 	}
 
@@ -161,7 +166,7 @@ item! {
 
 	MonoOperation {
 		op: {Operator},
-		expr: (Expression),
+		expr: PrimaryExpression,
 	}
 
 	Evaluate {
@@ -256,22 +261,27 @@ impl fmt::Debug for LiteralExpression<'_> {
 
 generic! {
 	PrimaryExpression {
-		MonoOperation,
 		Group,
 		IdentifierExpression,
 		LiteralExpression,
 	}
 
-	BinaryExpression {
+	SecondaryExpression {
+		MonoOperation,
+		Invocation,
+		PrimaryExpression,
+	}
+
+	TertiaryExpression {
 		GeometricOperation,
 		ArithmeticOperation,
 		BinaryOperation,
+		SecondaryExpression,
 	}
 
 	Expression {
-		BinaryExpression,
-		Invocation,
-		PrimaryExpression,
+		Join,
+		TertiaryExpression,
 	}
 
 	Statement {
@@ -317,7 +327,7 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
 				while stream
 					.with(|stream| {
 						stream.next().and_then(|Spanned { value, .. }| match value {
-							Token::Operator(Operator(",")) => Some(()),
+							Token::Separator(Separator(",")) => Some(()),
 							_ => None,
 						})
 					})
@@ -358,20 +368,26 @@ parse! {
 	};
 
 	GeometricOperation {
-		PrimaryExpression as lhs,
+		SecondaryExpression as lhs,
 		Operator("*" | "/") as op,
-		Expression as rhs,
+		TertiaryExpression as rhs,
 	};
 
 	ArithmeticOperation {
-		PrimaryExpression as lhs,
+		SecondaryExpression as lhs,
 		Operator("+" | "-") as op,
-		Expression as rhs,
+		TertiaryExpression as rhs,
 	};
 
 	BinaryOperation {
-		PrimaryExpression as lhs,
+		SecondaryExpression as lhs,
 		Operator as op,
+		TertiaryExpression as rhs,
+	};
+
+	Join {
+		TertiaryExpression as lhs,
+		Separator(","),
 		Expression as rhs,
 	};
 
@@ -390,7 +406,7 @@ parse! {
 
 	MonoOperation {
 		Operator as op,
-		Expression as expr,
+		PrimaryExpression as expr,
 	};
 
 	Evaluate {

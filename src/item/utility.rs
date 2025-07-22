@@ -44,3 +44,13 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for CommaList<T> {
 			.or(Some(Vec::new()))
 	}
 }
+
+pub struct Optional<T>(std::marker::PhantomData<T>);
+
+impl<'a, T: Parseable<'a>> Parseable<'a> for Optional<T> {
+	type Target = Option<T::Target>;
+
+	fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
+		T::parse(stream).map(Option::Some)
+	}
+}

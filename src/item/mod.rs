@@ -4,11 +4,11 @@ use crate::lexer::TokenStream;
 use crate::lexer::*;
 use crate::prelude::*;
 
-pub mod list;
 mod macros;
+pub mod utility;
 
-use list::*;
 use macros::*;
+use utility::*;
 
 item! {
 	IdentifierExpression {
@@ -28,25 +28,25 @@ item! {
 	Break {}
 
 	GeometricOperation {
-		lhs: SecondaryExpression,
+		lhs: PrimaryExpression,
 		op: {Operator},
-		rhs: (TertiaryExpression),
+		rhs: (GenericExpression),
 	}
 
 	ArithmeticOperation {
-		lhs: SecondaryExpression,
+		lhs: PrimaryExpression,
 		op: {Operator},
-		rhs: (TertiaryExpression),
+		rhs: (GenericExpression),
 	}
 
 	BinaryOperation {
-		lhs: SecondaryExpression,
+		lhs: PrimaryExpression,
 		op: {Operator},
-		rhs: (TertiaryExpression),
+		rhs: (GenericExpression),
 	}
 
 	Join {
-		lhs: TertiaryExpression,
+		lhs: GenericExpression,
 		rhs: (Expression),
 	}
 
@@ -55,13 +55,13 @@ item! {
 	}
 
 	Invocation {
-		expr: PrimaryExpression,
-		args: [Expression],
+		expr: UnaryExpression,
+		args: [GenericExpression],
 	}
 
-	MonoOperation {
+	UnaryOperation {
 		op: {Operator},
-		expr: PrimaryExpression,
+		expr: UnaryExpression,
 	}
 
 	Evaluate {
@@ -135,28 +135,28 @@ item! {
 }
 
 generic! {
-	PrimaryExpression {
+	UnaryExpression {
 		Group,
 		IdentifierExpression,
 		LiteralExpression,
 	}
 
-	SecondaryExpression {
-		MonoOperation,
+	PrimaryExpression {
+		UnaryOperation,
 		Invocation,
-		PrimaryExpression,
+		UnaryExpression,
 	}
 
-	TertiaryExpression {
+	GenericExpression {
 		GeometricOperation,
 		ArithmeticOperation,
 		BinaryOperation,
-		SecondaryExpression,
+		PrimaryExpression,
 	}
 
 	Expression {
 		Join,
-		TertiaryExpression,
+		GenericExpression,
 	}
 
 	Statement {
@@ -197,25 +197,25 @@ parse! {
 	};
 
 	GeometricOperation {
-		SecondaryExpression as lhs,
+		PrimaryExpression as lhs,
 		Operator("*" | "/") as op,
-		TertiaryExpression as rhs,
+		GenericExpression as rhs,
 	};
 
 	ArithmeticOperation {
-		SecondaryExpression as lhs,
+		PrimaryExpression as lhs,
 		Operator("+" | "-") as op,
-		TertiaryExpression as rhs,
+		GenericExpression as rhs,
 	};
 
 	BinaryOperation {
-		SecondaryExpression as lhs,
+		PrimaryExpression as lhs,
 		Operator as op,
-		TertiaryExpression as rhs,
+		GenericExpression as rhs,
 	};
 
 	Join {
-		TertiaryExpression as lhs,
+		GenericExpression as lhs,
 		Separator(","),
 		Expression as rhs,
 	};
@@ -227,15 +227,15 @@ parse! {
 	};
 
 	Invocation {
-		PrimaryExpression as expr,
+		UnaryExpression as expr,
 		Separator("("),
-		CommaList<Expression> as args,
+		CommaList<GenericExpression> as args,
 		Separator(")"),
 	};
 
-	MonoOperation {
+	UnaryOperation {
 		Operator as op,
-		PrimaryExpression as expr,
+		UnaryExpression as expr,
 	};
 
 	Evaluate {

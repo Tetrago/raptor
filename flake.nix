@@ -48,6 +48,12 @@
 
             RUSTFLAGS = "-C linker=clang -C link-arg=-fuse-ld=mold";
           };
+
+          docs = pkgs.mkShell {
+            packages = with pkgs; [
+              (python3.withPackages (ps: with ps; [ railroad-diagrams ]))
+            ];
+          };
         }
       );
     };

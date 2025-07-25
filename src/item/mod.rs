@@ -1,4 +1,3 @@
-use crate::group;
 use crate::lexer::Parseable;
 use crate::lexer::TokenStream;
 use crate::lexer::*;
@@ -11,14 +10,6 @@ use macros::*;
 use utility::*;
 
 item! {
-	IdentifierExpression {
-		ident: {Identifier}
-	}
-
-	LiteralExpression {
-		literal: {Literal}
-	}
-
 	Empty {}
 
 	Block {
@@ -137,8 +128,8 @@ item! {
 generic! {
 	UnaryExpression {
 		Group,
-		IdentifierExpression,
-		LiteralExpression,
+		Identifier,
+		Literal,
 	}
 
 	PrimaryExpression {
@@ -181,8 +172,6 @@ generic! {
 }
 
 parse! {
-	IdentifierExpression { Identifier as ident };
-	LiteralExpression { Literal as literal };
 	Empty { Separator(";") };
 
 	Block {

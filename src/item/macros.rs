@@ -105,14 +105,29 @@ macro_rules! generic {
 			}
 		)+
 
-		group! {
-			$(
-				#[derive(Clone, Eq, PartialEq)]
-				pub enum $ident {
-					$($name),+
+		$(
+			#[derive(Clone, Eq, PartialEq)]
+			pub enum $ident<'a> {
+				$($name(<$name<'a> as Parseable<'a>>::Target)),*
+			}
+
+			#[cfg_attr(coverage, coverage(off))]
+			impl ::std::fmt::Debug for $ident<'_> {
+				fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+					match self {
+						$($ident::$name(x) => x.fmt(f)),+
+					}
 				}
-			)+
-		}
+			}
+
+			$(
+				impl<'a> From<<$name<'a> as Parseable<'a>>::Target> for $ident<'a> {
+					fn from(value: <$name<'a> as Parseable<'a>>::Target) -> Self {
+						Self::$name(value)
+					}
+				}
+			)*
+		)+
 	};
 }
 

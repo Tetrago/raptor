@@ -21,13 +21,10 @@ STYLE = DEFAULT_STYLE + """\
           fill: hsl(60, 80%, 85%);
         }
         svg.railroad-diagram .operator > rect {
-          fill: hsl(300, 60%, 85%);
+          fill: hsl(350, 60%, 85%);
         }
         svg.railroad-diagram .separator > rect {
           fill: hsl(30, 70%, 85%);
-        }
-        svg.railroad-diagram .item > rect {
-          fill: hsl(120, 60%, 85%);
         }
 """
 
@@ -55,7 +52,7 @@ def separator(value):
 
 
 def item(value):
-    return Terminal(value, cls="item")
+    return NonTerminal(value)
 
 
 class Document:
@@ -85,14 +82,14 @@ class Document:
 
 
 DIAGRAMS = {
+    "Generic":
+    Sequence(operator("<"), ZeroOrMore(item("Type"), separator(",")),
+             operator(">")),
     "Type":
     Sequence(
-        OneOrMore(
-            Sequence(
-                identifier(),
-                Optional(Sequence(operator("<"), item("Type"), operator(">")),
-                         skip=True)), operator("::")),
-        ZeroOrMore(operator("*")),
+        OneOrMore(Sequence(identifier(), Optional(item("Generic"), skip=True)),
+                  operator("::")),
+        ZeroOrMore(Sequence(Optional("const", skip=True), operator("*"))),
         Choice(1, operator("?"), Skip(), operator("!"))),
     "Unary Expression":
     Choice(0, Sequence(separator("("), item("Expression"), separator(")")),
@@ -103,33 +100,54 @@ DIAGRAMS = {
         Group(Sequence(operator(), item("Unary Expression")),
               "Unary Operation"),
         Group(
-            Sequence(identifier(), separator("("),
-                     ZeroOrMore(item("Generic Expression"), separator(",")),
-                     separator(")")), "Invocation"), item("Unary Expression")),
-    "Generic Expression":
+            Sequence(item("Unary Expression"),
+                     Optional(item("Generic"), skip=True), separator("("),
+                     ZeroOrMore(item("Singular Expression"), separator(",")),
+                     separator(")")), "Invocation"),
+        Sequence(item("Unary Expression"),
+                 Choice(1, operator("!"), Skip(), operator("?"))),
+    ),
+    "Singular Expression":
     Choice(
         0,
         Group(
             Sequence(item("Primary Expression"),
                      Choice(0, operator("*"), operator("/")),
-                     item("Generic Expression")), "Geometric Operation"),
+                     item("Singular Expression")), "Geometric Operation"),
         Group(
             Sequence(item("Primary Expression"),
                      Choice(0, operator("+"), operator("-")),
-                     item("Generic Expression")), "Arithmetic Operation"),
+                     item("Singular Expression")), "Arithmetic Operation"),
+        Group(
+            Sequence(
+                item("Primary Expression"),
+                HorizontalChoice(operator(">"), operator("<"), operator(">="),
+                                 operator("<="),
+                                 operator("=="), operator("!=")),
+                item("Singular Expression")), "Inequality"),
+        Group(
+            Sequence(item("Primary Expression"),
+                     Choice(0, operator("||"), operator("&&")),
+                     item("Singular Expression")), "Boolean Operation"),
+        Group(
+            Sequence(item("Primary Expression"), operator("?"),
+                     item("Singular Expression"), operator(":"),
+                     item("Singular Expression")), "Ternary Operation"),
         Group(
             Sequence(item("Primary Expression"), operator(),
-                     item("Generic Expression")), "Binary Operation")),
+                     item("Singular Expression")), "Binary Operation")),
     "Expression":
-    OneOrMore(item("Generic Expression"), separator(",")),
+    OneOrMore(item("Singular Expression"), separator(",")),
     "Label":
     Sequence(operator("'"), identifier(), separator(":")),
     "Statement":
     Choice(
         0,
-        Sequence(separator("{"), ZeroOrMore(item("Statement"), separator(",")),
+        Sequence(separator("{"), ZeroOrMore(item("Statement")),
                  separator("}")),
-        Sequence(identifier("break"), separator(";")),
+        Sequence(identifier("break"),
+                 Optional(Group(identifier(), "Label"), skip=True),
+                 separator(";")),
         separator(";"),
         Sequence(Optional(item("Label"), skip=True), identifier("do"),
                  item("Statement"), identifier("while"), separator("("),
@@ -140,11 +158,13 @@ DIAGRAMS = {
                  separator(";"), item("Expression"), separator(")"),
                  item("Statement")),
         Sequence(
-            identifier("let"), identifier(),
-            Optional(Group(Sequence(operator(":"), item("Type")),
-                           "Value Type"),
-                     skip=True), operator("="), item("Expression"),
-            separator(";")),
+            Choice(0, identifier("let"), identifier("const")),
+            OneOrMore(
+                identifier(),
+                Optional(Group(Sequence(operator(":"), item("Type")),
+                               "Value Type"),
+                         skip=True)), operator("="),
+            OneOrMore(item("Expression")), separator(";")),
         Sequence(Optional(item("Label"), skip=True), identifier("loop"),
                  item("Statement")),
         Sequence(identifier("return"), item("Expression"), separator(";")),
@@ -160,7 +180,8 @@ DIAGRAMS = {
     "Function":
     Sequence(
         Optional(identifier("pub"), skip=True),
-        Stack(identifier("fn"), identifier(), separator("(")),
+        Stack(identifier("fn"), identifier(),
+              Optional(item("Generic"), skip=True), separator("(")),
         ZeroOrMore(
             Group(Sequence(identifier(), operator(":"), item("Type")),
                   "Parameter"), separator(",")), separator(")"),
@@ -168,10 +189,14 @@ DIAGRAMS = {
         item("Statement")),
     "Struct":
     Sequence(
-        identifier("struct"), identifier(), separator("{"),
+        Optional(identifier("pub"), skip=True),
+        Stack(identifier("struct"), identifier(),
+              Optional(item("Generic"), skip=True), separator("{")),
         ZeroOrMore(
-            Group(Sequence(identifier(), operator(":"), item("Type")),
-                  "Field"), separator(",")), separator("}")),
+            Group(
+                Sequence(Optional(identifier("pub"), skip=True), identifier(),
+                         operator(":"), item("Type")), "Field"),
+            separator(",")), separator("}")),
     "File":
     ZeroOrMore(Choice(0, item("Function"), item("Struct")))
 }

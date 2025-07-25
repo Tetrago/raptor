@@ -9,7 +9,7 @@
 <path d="M441.25 55h0.0" /><path d="M509.75 55h0.0" /><path d="M441.25 55h20" /><g class="terminal operator">
 <path d="M461.25 55h0.0" /><path d="M489.75 55h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="461.25" y="44"></rect><text x="475.5" y="59">*</text></g><path d="M489.75 55h20" /><path d="M441.25 55a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10" /><g class="terminal operator">
 <path d="M461.25 85h0.0" /><path d="M489.75 85h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="461.25" y="74"></rect><text x="475.5" y="89">/</text></g><path d="M489.75 85a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10" /></g><path d="M509.75 55h10" /><g class="non-terminal ">
-<path d="M519.75 55h0.0" /><path d="M692.75 55h0.0" /><rect height="22" width="173" x="519.75" y="44"></rect><text x="606.25" y="59">Generic Expression</text></g></g><g class="non-terminal ">
+<path d="M519.75 55h0.0" /><path d="M692.75 55h0.0" /><rect height="22" width="173" x="519.75" y="44"></rect><text x="606.25" y="59">General Expression</text></g></g><g class="non-terminal ">
 <path d="M248.25 28h0.0" /><path d="M391.25 28h0.0" /><text class="comment" x="319.75" y="33">Geometric Operation</text></g></g><path d="M891.0 55h20" /><path d="M40.0 55a10 10 0 0 1 10 10v72a10 10 0 0 0 10 10" /><g>
 <path d="M60.0 147h188.25" /><path d="M702.75 147h188.25" /><rect class="group-box" height="68" rx="10" ry="10" width="454.5" x="248.25" y="128"></rect><g>
 <path d="M248.25 147h10.0" /><path d="M692.75 147h10.0" /><g class="non-terminal ">
@@ -17,7 +17,7 @@
 <path d="M441.25 147h0.0" /><path d="M509.75 147h0.0" /><path d="M441.25 147h20" /><g class="terminal operator">
 <path d="M461.25 147h0.0" /><path d="M489.75 147h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="461.25" y="136"></rect><text x="475.5" y="151">+</text></g><path d="M489.75 147h20" /><path d="M441.25 147a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10" /><g class="terminal operator">
 <path d="M461.25 177h0.0" /><path d="M489.75 177h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="461.25" y="166"></rect><text x="475.5" y="181">-</text></g><path d="M489.75 177a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10" /></g><path d="M509.75 147h10" /><g class="non-terminal ">
-<path d="M519.75 147h0.0" /><path d="M692.75 147h0.0" /><rect height="22" width="173" x="519.75" y="136"></rect><text x="606.25" y="151">Generic Expression</text></g></g><g class="non-terminal ">
+<path d="M519.75 147h0.0" /><path d="M692.75 147h0.0" /><rect height="22" width="173" x="519.75" y="136"></rect><text x="606.25" y="151">General Expression</text></g></g><g class="non-terminal ">
 <path d="M248.25 120h0.0" /><path d="M398.25 120h0.0" /><text class="comment" x="323.25" y="125">Arithmetic Operation</text></g></g><path d="M891.0 147a10 10 0 0 0 10 -10v-72a10 10 0 0 1 10 -10" /><path d="M40.0 55a10 10 0 0 1 10 10v173a10 10 0 0 0 10 10" /><g>
 <path d="M60.0 248h0.0" /><path d="M891.0 248h0.0" /><rect class="group-box" height="56" rx="10" ry="10" width="831" x="60" y="220"></rect><g>
 <path d="M60.0 248h10.0" /><path d="M881.0 248h10.0" /><g class="non-terminal ">
@@ -29,7 +29,7 @@
 <path d="M477.0 248h10.0" /><path d="M524.0 248h10.0" /><rect height="22" rx="10" ry="10" width="37" x="487" y="237"></rect><text x="505.5" y="252">&lt;=</text></g><path d="M534.0 248a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10" /><path d="M534.0 228a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10" /><g class="terminal operator">
 <path d="M554.0 248h10.0" /><path d="M601.0 248h10.0" /><rect height="22" rx="10" ry="10" width="37" x="564" y="237"></rect><text x="582.5" y="252">==</text></g><path d="M611.0 248a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10" /><path d="M611.0 228a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10" /><g class="terminal operator">
 <path d="M631.0 248h10.0" /><path d="M678.0 248h10.0" /><rect height="22" rx="10" ry="10" width="37" x="641" y="237"></rect><text x="659.5" y="252">!=</text></g><path d="M688.0 248h10" /></g><path d="M698.0 248h10" /><g class="non-terminal ">
-<path d="M708.0 248h0.0" /><path d="M881.0 248h0.0" /><rect height="22" width="173" x="708" y="237"></rect><text x="794.5" y="252">Generic Expression</text></g></g><g class="non-terminal ">
+<path d="M708.0 248h0.0" /><path d="M881.0 248h0.0" /><rect height="22" width="173" x="708" y="237"></rect><text x="794.5" y="252">General Expression</text></g></g><g class="non-terminal ">
 <path d="M60.0 212h0.0" /><path d="M140.0 212h0.0" /><text class="comment" x="100" y="217">Inequality</text></g></g><path d="M891.0 248a10 10 0 0 0 10 -10v-173a10 10 0 0 1 10 -10" /><path d="M40.0 55a10 10 0 0 1 10 10v244a10 10 0 0 0 10 10" /><g>
 <path d="M60.0 319h184.0" /><path d="M707.0 319h184.0" /><rect class="group-box" height="68" rx="10" ry="10" width="463" x="244" y="300"></rect><g>
 <path d="M244.0 319h10.0" /><path d="M697.0 319h10.0" /><g class="non-terminal ">
@@ -37,21 +37,21 @@
 <path d="M437.0 319h0.0" /><path d="M514.0 319h0.0" /><path d="M437.0 319h20" /><g class="terminal operator">
 <path d="M457.0 319h0.0" /><path d="M494.0 319h0.0" /><rect height="22" rx="10" ry="10" width="37" x="457" y="308"></rect><text x="475.5" y="323">||</text></g><path d="M494.0 319h20" /><path d="M437.0 319a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10" /><g class="terminal operator">
 <path d="M457.0 349h0.0" /><path d="M494.0 349h0.0" /><rect height="22" rx="10" ry="10" width="37" x="457" y="338"></rect><text x="475.5" y="353">&amp;&amp;</text></g><path d="M494.0 349a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10" /></g><path d="M514.0 319h10" /><g class="non-terminal ">
-<path d="M524.0 319h0.0" /><path d="M697.0 319h0.0" /><rect height="22" width="173" x="524" y="308"></rect><text x="610.5" y="323">Generic Expression</text></g></g><g class="non-terminal ">
+<path d="M524.0 319h0.0" /><path d="M697.0 319h0.0" /><rect height="22" width="173" x="524" y="308"></rect><text x="610.5" y="323">General Expression</text></g></g><g class="non-terminal ">
 <path d="M244.0 292h0.0" /><path d="M373.0 292h0.0" /><text class="comment" x="308.5" y="297">Boolean Operation</text></g></g><path d="M891.0 319a10 10 0 0 0 10 -10v-244a10 10 0 0 1 10 -10" /><path d="M40.0 55a10 10 0 0 1 10 10v336a10 10 0 0 0 10 10" /><g>
 <path d="M60.0 411h77.5" /><path d="M813.5 411h77.5" /><rect class="group-box" height="38" rx="10" ry="10" width="676" x="137.5" y="392"></rect><g>
 <path d="M137.5 411h10.0" /><path d="M803.5 411h10.0" /><g class="non-terminal ">
 <path d="M147.5 411h0.0" /><path d="M320.5 411h0.0" /><rect height="22" width="173" x="147.5" y="400"></rect><text x="234" y="415">Primary Expression</text></g><path d="M320.5 411h10" /><path d="M330.5 411h10" /><g class="terminal operator">
 <path d="M340.5 411h0.0" /><path d="M369.0 411h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="340.5" y="400"></rect><text x="354.75" y="415">?</text></g><path d="M369.0 411h10" /><path d="M379.0 411h10" /><g class="non-terminal ">
-<path d="M389.0 411h0.0" /><path d="M562.0 411h0.0" /><rect height="22" width="173" x="389" y="400"></rect><text x="475.5" y="415">Generic Expression</text></g><path d="M562.0 411h10" /><path d="M572.0 411h10" /><g class="terminal operator">
+<path d="M389.0 411h0.0" /><path d="M562.0 411h0.0" /><rect height="22" width="173" x="389" y="400"></rect><text x="475.5" y="415">General Expression</text></g><path d="M562.0 411h10" /><path d="M572.0 411h10" /><g class="terminal operator">
 <path d="M582.0 411h0.0" /><path d="M610.5 411h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="582" y="400"></rect><text x="596.25" y="415">:</text></g><path d="M610.5 411h10" /><path d="M620.5 411h10" /><g class="non-terminal ">
-<path d="M630.5 411h0.0" /><path d="M803.5 411h0.0" /><rect height="22" width="173" x="630.5" y="400"></rect><text x="717" y="415">Generic Expression</text></g></g><g class="non-terminal ">
+<path d="M630.5 411h0.0" /><path d="M803.5 411h0.0" /><rect height="22" width="173" x="630.5" y="400"></rect><text x="717" y="415">General Expression</text></g></g><g class="non-terminal ">
 <path d="M137.5 384h0.0" /><path d="M266.5 384h0.0" /><text class="comment" x="202" y="389">Ternary Operation</text></g></g><path d="M891.0 411a10 10 0 0 0 10 -10v-336a10 10 0 0 1 10 -10" /><path d="M40.0 55a10 10 0 0 1 10 10v398a10 10 0 0 0 10 10" /><g>
 <path d="M60.0 473h168.5" /><path d="M722.5 473h168.5" /><rect class="group-box" height="38" rx="10" ry="10" width="494" x="228.5" y="454"></rect><g>
 <path d="M228.5 473h10.0" /><path d="M712.5 473h10.0" /><g class="non-terminal ">
 <path d="M238.5 473h0.0" /><path d="M411.5 473h0.0" /><rect height="22" width="173" x="238.5" y="462"></rect><text x="325" y="477">Primary Expression</text></g><path d="M411.5 473h10" /><path d="M421.5 473h10" /><g class="terminal operator">
 <path d="M431.5 473h0.0" /><path d="M519.5 473h0.0" /><rect height="22" rx="10" ry="10" width="88" x="431.5" y="462"></rect><text x="475.5" y="477">Operator</text></g><path d="M519.5 473h10" /><path d="M529.5 473h10" /><g class="non-terminal ">
-<path d="M539.5 473h0.0" /><path d="M712.5 473h0.0" /><rect height="22" width="173" x="539.5" y="462"></rect><text x="626" y="477">Generic Expression</text></g></g><g class="non-terminal ">
+<path d="M539.5 473h0.0" /><path d="M712.5 473h0.0" /><rect height="22" width="173" x="539.5" y="462"></rect><text x="626" y="477">General Expression</text></g></g><g class="non-terminal ">
 <path d="M228.5 446h0.0" /><path d="M350.5 446h0.0" /><text class="comment" x="289.5" y="451">Binary Operation</text></g></g><path d="M891.0 473a10 10 0 0 0 10 -10v-398a10 10 0 0 1 10 -10" /></g><path d="M 911.0 55 h 20 m -10 -10 v 20 m 10 -20 v 20"></path></g><style>/* <![CDATA[ */
 	svg.railroad-diagram {
 		background-color:hsl(30,20%,95%);

@@ -1,22 +1,32 @@
-<svg class="railroad-diagram" height="132" viewBox="0 0 700.5 132" width="700.5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg class="railroad-diagram" height="259" viewBox="0 0 792.0 259" width="792.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g transform="translate(.5 .5)">
 <g>
-<path d="M20 53v20m10 -20v20m-10 -10h20" /></g><path d="M40 63h10" /><g>
-<path d="M50 63h0.0" /><path d="M650.5 63h0.0" /><g class="terminal identifier">
-<path d="M50.0 63h0.0" /><path d="M121.0 63h0.0" /><rect height="22" rx="10" ry="10" width="71" x="50" y="52"></rect><text x="85.5" y="67">struct</text></g><path d="M121.0 63h10" /><path d="M131.0 63h10" /><g class="terminal identifier">
-<path d="M141.0 63h0.0" /><path d="M246.0 63h0.0" /><rect height="22" rx="10" ry="10" width="105" x="141" y="52"></rect><text x="193.5" y="67">Identifier</text></g><path d="M246.0 63h10" /><path d="M256.0 63h10" /><g class="terminal separator">
-<path d="M266.0 63h0.0" /><path d="M294.5 63h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="266" y="52"></rect><text x="280.25" y="67">{</text></g><path d="M294.5 63h10" /><g>
-<path d="M304.5 63h0.0" /><path d="M612.0 63h0.0" /><path d="M304.5 63a10 10 0 0 0 10 -10v-23a10 10 0 0 1 10 -10" /><g>
-<path d="M324.5 20h267.5" /></g><path d="M592.0 20a10 10 0 0 1 10 10v23a10 10 0 0 0 10 10" /><path d="M304.5 63h20" /><g>
-<path d="M324.5 63h0.0" /><path d="M592.0 63h0.0" /><path d="M324.5 63h10" /><g>
-<path d="M334.5 63h0.0" /><path d="M582.0 63h0.0" /><rect class="group-box" height="38" rx="10" ry="10" width="247.5" x="334.5" y="44"></rect><g>
-<path d="M334.5 63h10.0" /><path d="M572.0 63h10.0" /><g class="terminal identifier">
-<path d="M344.5 63h0.0" /><path d="M449.5 63h0.0" /><rect height="22" rx="10" ry="10" width="105" x="344.5" y="52"></rect><text x="397" y="67">Identifier</text></g><path d="M449.5 63h10" /><path d="M459.5 63h10" /><g class="terminal operator">
-<path d="M469.5 63h0.0" /><path d="M498.0 63h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="469.5" y="52"></rect><text x="483.75" y="67">:</text></g><path d="M498.0 63h10" /><path d="M508.0 63h10" /><g class="terminal item">
-<path d="M518.0 63h0.0" /><path d="M572.0 63h0.0" /><rect height="22" rx="10" ry="10" width="54" x="518" y="52"></rect><text x="545" y="67">Type</text></g></g><g class="non-terminal ">
-<path d="M334.5 36h0.0" /><path d="M379.5 36h0.0" /><text class="comment" x="357" y="41">Field</text></g></g><path d="M582.0 63h10" /><path d="M334.5 63a10 10 0 0 0 -10 10v18a10 10 0 0 0 10 10" /><g class="terminal separator">
-<path d="M334.5 101h109.5" /><path d="M472.5 101h109.5" /><rect height="22" rx="10" ry="10" width="28.5" x="444" y="90"></rect><text x="458.25" y="105">,</text></g><path d="M582.0 101a10 10 0 0 0 10 -10v-18a10 10 0 0 0 -10 -10" /></g><path d="M592.0 63h20" /></g><path d="M612.0 63h10" /><g class="terminal separator">
-<path d="M622.0 63h0.0" /><path d="M650.5 63h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="622" y="52"></rect><text x="636.25" y="67">}</text></g></g><path d="M650.5 63h10" /><path d="M 660.5 63 h 20 m -10 -10 v 20 m 10 -20 v 20"></path></g><style>/* <![CDATA[ */
+<path d="M20 21v20m10 -20v20m-10 -10h20" /></g><path d="M40 31h10" /><g>
+<path d="M50 31h0.0" /><path d="M742.0 170h0.0" /><g>
+<path d="M50.0 31h0.0" /><path d="M135.5 31h0.0" /><path d="M50.0 31h20" /><g>
+<path d="M70.0 31h45.5" /></g><path d="M115.5 31h20" /><path d="M50.0 31a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10" /><g class="terminal identifier">
+<path d="M70.0 51h0.0" /><path d="M115.5 51h0.0" /><rect height="22" rx="10" ry="10" width="45.5" x="70" y="40"></rect><text x="92.75" y="55">pub</text></g><path d="M115.5 51a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10" /></g><path d="M135.5 31h10" /><g>
+<path d="M145.5 31h0.0" /><path d="M145.5 31h10" /><g class="terminal identifier">
+<path d="M155.5 31h27.0" /><path d="M253.5 31h27.0" /><rect height="22" rx="10" ry="10" width="71" x="182.5" y="20"></rect><text x="218" y="35">struct</text></g><path d="M280.5 31a10 10 0 0 1 10 10v0a10 10 0 0 1 -10 10h-125.0a10 10 0 0 0 -10 10v0a10 10 0 0 0 10 10" /><g class="terminal identifier">
+<path d="M155.5 71h10.0" /><path d="M270.5 71h10.0" /><rect height="22" rx="10" ry="10" width="105" x="165.5" y="60"></rect><text x="218" y="75">Identifier</text></g><path d="M280.5 71a10 10 0 0 1 10 10v0a10 10 0 0 1 -10 10h-125.0a10 10 0 0 0 -10 10v0a10 10 0 0 0 10 10" /><g>
+<path d="M155.5 111h2.75" /><path d="M277.75 111h2.75" /><path d="M158.25 111h20" /><g>
+<path d="M178.25 111h79.5" /></g><path d="M257.75 111h20" /><path d="M158.25 111a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10" /><g class="non-terminal ">
+<path d="M178.25 131h0.0" /><path d="M257.75 131h0.0" /><rect height="22" width="79.5" x="178.25" y="120"></rect><text x="218" y="135">Generic</text></g><path d="M257.75 131a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10" /></g><path d="M280.5 111a10 10 0 0 1 10 10v19a10 10 0 0 1 -10 10h-125.0a10 10 0 0 0 -10 10v0a10 10 0 0 0 10 10" /><g class="terminal separator">
+<path d="M155.5 170h48.25" /><path d="M232.25 170h48.25" /><rect height="22" rx="10" ry="10" width="28.5" x="203.75" y="159"></rect><text x="218" y="174">{</text></g><path d="M280.5 170h10" /><path d="M290.5 170h0.0" /></g><path d="M290.5 170h10" /><g>
+<path d="M300.5 170h0.0" /><path d="M703.5 170h0.0" /><path d="M300.5 170a10 10 0 0 0 10 -10v-23a10 10 0 0 1 10 -10" /><g>
+<path d="M320.5 127h363.0" /></g><path d="M683.5 127a10 10 0 0 1 10 10v23a10 10 0 0 0 10 10" /><path d="M300.5 170h20" /><g>
+<path d="M320.5 170h0.0" /><path d="M683.5 170h0.0" /><path d="M320.5 170h10" /><g>
+<path d="M330.5 170h0.0" /><path d="M673.5 170h0.0" /><rect class="group-box" height="58" rx="10" ry="10" width="343" x="330.5" y="151"></rect><g>
+<path d="M330.5 170h10.0" /><path d="M663.5 170h10.0" /><g>
+<path d="M340.5 170h0.0" /><path d="M426.0 170h0.0" /><path d="M340.5 170h20" /><g>
+<path d="M360.5 170h45.5" /></g><path d="M406.0 170h20" /><path d="M340.5 170a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10" /><g class="terminal identifier">
+<path d="M360.5 190h0.0" /><path d="M406.0 190h0.0" /><rect height="22" rx="10" ry="10" width="45.5" x="360.5" y="179"></rect><text x="383.25" y="194">pub</text></g><path d="M406.0 190a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10" /></g><path d="M426.0 170h10" /><g class="terminal identifier">
+<path d="M436.0 170h0.0" /><path d="M541.0 170h0.0" /><rect height="22" rx="10" ry="10" width="105" x="436" y="159"></rect><text x="488.5" y="174">Identifier</text></g><path d="M541.0 170h10" /><path d="M551.0 170h10" /><g class="terminal operator">
+<path d="M561.0 170h0.0" /><path d="M589.5 170h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="561" y="159"></rect><text x="575.25" y="174">:</text></g><path d="M589.5 170h10" /><path d="M599.5 170h10" /><g class="non-terminal ">
+<path d="M609.5 170h0.0" /><path d="M663.5 170h0.0" /><rect height="22" width="54" x="609.5" y="159"></rect><text x="636.5" y="174">Type</text></g></g><g class="non-terminal ">
+<path d="M330.5 143h0.0" /><path d="M375.5 143h0.0" /><text class="comment" x="353" y="148">Field</text></g></g><path d="M673.5 170h10" /><path d="M330.5 170a10 10 0 0 0 -10 10v38a10 10 0 0 0 10 10" /><g class="terminal separator">
+<path d="M330.5 228h157.25" /><path d="M516.25 228h157.25" /><rect height="22" rx="10" ry="10" width="28.5" x="487.75" y="217"></rect><text x="502" y="232">,</text></g><path d="M673.5 228a10 10 0 0 0 10 -10v-38a10 10 0 0 0 -10 -10" /></g><path d="M683.5 170h20" /></g><path d="M703.5 170h10" /><g class="terminal separator">
+<path d="M713.5 170h0.0" /><path d="M742.0 170h0.0" /><rect height="22" rx="10" ry="10" width="28.5" x="713.5" y="159"></rect><text x="727.75" y="174">}</text></g></g><path d="M742.0 170h10" /><path d="M 752.0 170 h 20 m -10 -10 v 20 m 10 -20 v 20"></path></g><style>/* <![CDATA[ */
 	svg.railroad-diagram {
 		background-color:hsl(30,20%,95%);
 	}
@@ -52,13 +62,10 @@
           fill: hsl(60, 80%, 85%);
         }
         svg.railroad-diagram .operator > rect {
-          fill: hsl(300, 60%, 85%);
+          fill: hsl(350, 60%, 85%);
         }
         svg.railroad-diagram .separator > rect {
           fill: hsl(30, 70%, 85%);
-        }
-        svg.railroad-diagram .item > rect {
-          fill: hsl(120, 60%, 85%);
         }
 
 /* ]]> */

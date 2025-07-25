@@ -41,13 +41,10 @@
           fill: hsl(60, 80%, 85%);
         }
         svg.railroad-diagram .operator > rect {
-          fill: hsl(300, 60%, 85%);
+          fill: hsl(350, 60%, 85%);
         }
         svg.railroad-diagram .separator > rect {
           fill: hsl(30, 70%, 85%);
-        }
-        svg.railroad-diagram .item > rect {
-          fill: hsl(120, 60%, 85%);
         }
 
 /* ]]> */

@@ -1,3 +1,7 @@
+## Generic
+
+![](./generic.svg)
+
 ## Type
 
 ![](./type.svg)
@@ -10,9 +14,9 @@
 
 ![](./primary_expression.svg)
 
-## Generic Expression
+## Singular Expression
 
-![](./generic_expression.svg)
+![](./singular_expression.svg)
 
 ## Expression
 

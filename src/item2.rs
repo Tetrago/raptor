@@ -21,7 +21,7 @@ macro_rules! item_struct {
 	};
 	($ident:ident { $($member:tt)* }) => {
 		#[derive(Debug, Clone, Eq, PartialEq)]
-		struct $ident<'a> {
+		pub struct $ident<'a> {
 			$($member)*
 		}
 	};
@@ -80,15 +80,13 @@ macro_rules! item_parse {
 	};
 	// This is the case responsible for handling other items (and by extension tokens).
 	($stream:ident => $ident:ident { $($member:tt)* } $field:ident : $item:tt, $($entry:tt)*) => {
-		if let Some(result) = <item_parse!(@field $item)>::parse($stream) {
+		<item_parse!(@field $item)>::parse($stream).and_then(|result| {
 			item_parse!($stream => $ident { $field: result.into(), $($member)* } $($entry)*)
-		} else {
-			None
-		}
+		})
 	};
 }
 
-/// Builds items, both their structures and their parsers.
+/// item builds items, both their structures and their parsers.
 macro_rules! item {
 	($(
 		$ident:ident {
@@ -109,10 +107,72 @@ macro_rules! item {
 	};
 }
 
+/// item_group_parse builds the option chain used to parse multiple possible
+/// items.
+macro_rules! item_group_parse {
+	($stream:ident =>) => {
+		None
+	};
+	($stream:ident => $field:ident $(,)? $($rest:ident),*) => {
+		$field::parse($stream).map(::std::convert::Into::into).or_else(|| {
+			item_group_parse!($stream => $($rest),*)
+		})
+	};
+}
+
+/// item_group is used to build items that act as containers for a choice of
+/// select items.
+macro_rules! item_group {
+	($(
+		$ident:ident {
+			$($field:ident),* $(,)?
+		}
+	)*) => {
+		$(
+			#[derive(Clone, Eq, PartialEq)]
+			pub enum $ident<'a> {
+				$($field(<$field<'a> as Parseable<'a>>::Target)),*
+			}
+
+			impl<'a> Parseable<'a> for $ident<'a> {
+				type Target = Self;
+
+				fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
+					item_group_parse!(stream => $($field),*)
+				}
+			}
+
+			#[cfg_attr(coverage, coverage(off))]
+			impl ::std::fmt::Debug for $ident<'_> {
+				fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+					match self {
+						$($ident::$field(x) => x.fmt(f)),*
+					}
+				}
+			}
+
+			$(
+				impl<'a> From<<$field<'a> as Parseable<'a>>::Target> for $ident<'a> {
+					fn from(value: <$field<'a> as Parseable<'a>>::Target) -> Self {
+						Self::$field(value)
+					}
+				}
+			)*
+		)*
+	};
+}
+
 item! {
 	Group {
 		Literal("("),
 		expr: [Expression],
 		Literal(")"),
+	}
+}
+
+item_group! {
+	SomeExpr {
+		Group,
+		Expression,
 	}
 }

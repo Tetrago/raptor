@@ -107,22 +107,22 @@ macro_rules! item {
 	};
 }
 
-/// item_group_parse builds the option chain used to parse multiple possible
+/// item_choice_parse builds the option chain used to parse multiple possible
 /// items.
-macro_rules! item_group_parse {
+macro_rules! item_choice_parse {
 	($stream:ident =>) => {
 		None
 	};
 	($stream:ident => $field:ident $(,)? $($rest:ident),*) => {
 		$field::parse($stream).map(::std::convert::Into::into).or_else(|| {
-			item_group_parse!($stream => $($rest),*)
+			item_choice_parse!($stream => $($rest),*)
 		})
 	};
 }
 
-/// item_group is used to build items that act as containers for a choice of
+/// item_choice is used to build items that act as containers for a choice of
 /// select items.
-macro_rules! item_group {
+macro_rules! item_choice {
 	($(
 		$ident:ident {
 			$($field:ident),* $(,)?
@@ -138,7 +138,7 @@ macro_rules! item_group {
 				type Target = Self;
 
 				fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
-					item_group_parse!(stream => $($field),*)
+					item_choice_parse!(stream => $($field),*)
 				}
 			}
 
@@ -162,17 +162,35 @@ macro_rules! item_group {
 	};
 }
 
-item! {
+/// The item_dsl macro is a combination of item and item_choice in one
+/// convenient syntax.
+#[macro_export]
+macro_rules! item_dsl {
+	($ident:ident { $($field:ident)|* }) => {
+		item_choice!($ident { $($field,)* });
+	};
+	($ident:ident { $($entry:tt)* }) => {
+		item!($ident { $($entry)* });
+	};
+	($(
+		$ident:ident {
+			$($tt:tt)*
+		}
+	)*) => {
+		$(
+			item_dsl!($ident { $($tt)* });
+		)*
+	};
+}
+
+item_dsl! {
 	Group {
 		Literal("("),
 		expr: [Expression],
 		Literal(")"),
 	}
-}
 
-item_group! {
 	SomeExpr {
-		Group,
-		Expression,
+		Group | Expression
 	}
 }

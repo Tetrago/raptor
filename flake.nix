@@ -38,6 +38,7 @@
         {
           default = (pkgs.mkShell.override { stdenv = pkgs.clangStdenv; }) {
             packages = with pkgs; [
+              cargo-expand
               cargo-llvm-cov
               cargo-nextest
               just

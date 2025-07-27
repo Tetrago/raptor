@@ -99,3 +99,11 @@ impl<'a, T: Parseable<'a>> Parseable<'a> for Box<T> {
 		stream.with(T::parse).map(Box::new)
 	}
 }
+
+impl<'a, T: Parseable<'a>> Parseable<'a> for Vec<T> {
+	type Target = Vec<T::Target>;
+
+	fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
+		Some(std::iter::from_fn(|| stream.with(T::parse)).collect())
+	}
+}

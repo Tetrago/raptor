@@ -92,7 +92,7 @@ DIAGRAMS = {
                   "Segment"), operator("::")),
         ZeroOrMore(
             Sequence(Optional(identifier("const"), skip=True), operator("*"))),
-        OptionalSequence("?", "!")),
+        OptionalSequence(operator("?"), operator("!"))),
     "Unary Expression":
     Choice(0, Sequence(separator("("), item("Expression"), separator(")")),
            identifier(), literal()),
@@ -138,7 +138,8 @@ DIAGRAMS = {
                      item("Singular Expression")), "Ternary Operation"),
         Group(
             Sequence(item("Primary Expression"), operator(),
-                     item("Singular Expression")), "Binary Operation")),
+                     item("Singular Expression")), "Binary Operation"),
+        item("Primary Expression")),
     "Expression":
     OneOrMore(item("Singular Expression"), separator(",")),
     "Label":

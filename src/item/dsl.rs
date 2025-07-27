@@ -86,6 +86,7 @@ macro_rules! item {
 			impl<'a> Parseable<'a> for $ident<'a> {
 				type Target = Self;
 
+				#[allow(unused_variables)]
 				fn parse(stream: &mut TokenStream<'a>) -> Option<Self::Target> {
 					item_parse!(stream => $ident {} $($entry)*)
 				}
@@ -155,6 +156,9 @@ macro_rules! item_choice {
 /// convenient syntax.
 #[macro_export]
 macro_rules! item_dsl {
+	($ident:ident {}) => {
+		item!($ident {});
+	};
 	($ident:ident { $($field:ident)|* }) => {
 		item_choice!($ident { $($field,)* });
 	};

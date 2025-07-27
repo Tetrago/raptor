@@ -87,10 +87,12 @@ DIAGRAMS = {
              operator(">")),
     "Type":
     Sequence(
-        OneOrMore(Sequence(identifier(), Optional(item("Generic"), skip=True)),
-                  operator("::")),
-        ZeroOrMore(Sequence(Optional("const", skip=True), operator("*"))),
-        Choice(1, operator("?"), Skip(), operator("!"))),
+        OneOrMore(
+            Group(Sequence(identifier(), Optional(item("Generic"), skip=True)),
+                  "Segment"), operator("::")),
+        ZeroOrMore(
+            Sequence(Optional(identifier("const"), skip=True), operator("*"))),
+        OptionalSequence("?", "!")),
     "Unary Expression":
     Choice(0, Sequence(separator("("), item("Expression"), separator(")")),
            identifier(), literal()),
@@ -105,7 +107,8 @@ DIAGRAMS = {
                      ZeroOrMore(item("Singular Expression"), separator(",")),
                      separator(")")), "Invocation"),
         Sequence(item("Unary Expression"),
-                 Choice(1, operator("!"), Skip(), operator("?"))),
+                 Choice(0, operator("!"), operator("?"))),
+        item("Unary Expression"),
     ),
     "Singular Expression":
     Choice(

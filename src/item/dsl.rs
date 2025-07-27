@@ -1,10 +1,5 @@
-use crate::item::Expression;
-use crate::lexer::Literal;
-use crate::lexer::Parseable;
-use crate::lexer::Token;
-use crate::lexer::TokenStream;
-
 /// item_struct is used to build structures for items using the item syntax.
+#[macro_export]
 macro_rules! item_struct {
 	($ident:ident {}) => {
 		#[derive(Default, Clone, Eq, PartialEq)]
@@ -29,21 +24,17 @@ macro_rules! item_struct {
 	($ident:ident { $($member:tt)* } $field:ident ($($_:literal)|+) $(as $binding:ident)?, $($entry:tt)*) => {
 		item_struct!($ident { $($binding: <$field<'a> as Parseable<'a>>::Target,)?  $($member)* } $($entry)*);
 	};
-	// These @field cases are used to deal with special cases of item types.
-	(@field $item:ident) => {
-		<$item<'a> as Parseable<'a>>::Target
-	};
-	// Such as boxes, which are used to prevent enum recursion.
-	(@field [$item:tt]) => {
-		Box::<item_struct!(@field $item)>
-	};
 	// This is the case responsible for handling other items (and by extension tokens).
-	($ident:ident { $($member:tt)* } $field:ident : $item:tt, $($entry:tt)*) => {
-		item_struct!($ident { $field: item_struct!(@field $item), $($member)* } $($entry)*);
+	($ident:ident { $($member:tt)* } $field:ident : $item:ident, $($entry:tt)*) => {
+		item_struct!($ident { $($member)* } $field : $item<'a>, $($entry)*);
+	};
+	($ident:ident { $($member:tt)* } $field:ident : $item:ty, $($entry:tt)*) => {
+		item_struct!($ident { $field: <$item as Parseable<'a>>::Target, $($member)* } $($entry)*);
 	};
 }
 
 /// item_parse is used to build parsers for items using the item syntax.
+#[macro_export]
 macro_rules! item_parse {
 	($stream:ident => $ident:ident {}) => {
 		Some($ident::default())
@@ -70,23 +61,19 @@ macro_rules! item_parse {
 			_ => None
 		}
 	};
-	// These @field cases are used to deal with special cases of item types.
-	(@field $item:ident) => {
-		$item<'a>
-	};
-	// In this macro, they usually just unwrap the type.
-	(@field [$item:tt]) => {
-		item_parse!(@field $item)
-	};
 	// This is the case responsible for handling other items (and by extension tokens).
-	($stream:ident => $ident:ident { $($member:tt)* } $field:ident : $item:tt, $($entry:tt)*) => {
-		<item_parse!(@field $item)>::parse($stream).and_then(|result| {
+	($stream:ident => $ident:ident { $($member:tt)* } $field:ident : $item:ident, $($entry:tt)*) => {
+		item_parse!($stream => $ident { $($member)* } $field : $item<'a>, $($entry)*)
+	};
+	($stream:ident => $ident:ident { $($member:tt)* } $field:ident : $item:ty, $($entry:tt)*) => {
+		<$item>::parse($stream).and_then(|result| {
 			item_parse!($stream => $ident { $field: result.into(), $($member)* } $($entry)*)
 		})
 	};
 }
 
 /// item builds items, both their structures and their parsers.
+#[macro_export]
 macro_rules! item {
 	($(
 		$ident:ident {
@@ -109,6 +96,7 @@ macro_rules! item {
 
 /// item_choice_parse builds the option chain used to parse multiple possible
 /// items.
+#[macro_export]
 macro_rules! item_choice_parse {
 	($stream:ident =>) => {
 		None
@@ -122,6 +110,7 @@ macro_rules! item_choice_parse {
 
 /// item_choice is used to build items that act as containers for a choice of
 /// select items.
+#[macro_export]
 macro_rules! item_choice {
 	($(
 		$ident:ident {
@@ -181,16 +170,4 @@ macro_rules! item_dsl {
 			item_dsl!($ident { $($tt)* });
 		)*
 	};
-}
-
-item_dsl! {
-	Group {
-		Literal("("),
-		expr: [Expression],
-		Literal(")"),
-	}
-
-	SomeExpr {
-		Group | Expression
-	}
 }
